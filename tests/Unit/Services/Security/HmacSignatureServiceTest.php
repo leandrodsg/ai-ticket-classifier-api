@@ -15,7 +15,7 @@ class HmacSignatureServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new HmacSignatureService();
+        $this->service = new HmacSignatureService('test_csv_signing_key_for_testing_only');
     }
 
     /** @test */
@@ -112,12 +112,9 @@ class HmacSignatureServiceTest extends TestCase
     /** @test */
     public function it_throws_exception_when_app_key_not_configured()
     {
-        // Temporarily unset APP_KEY
-        config(['app.key' => '']);
-
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('APP_KEY is not configured');
+        $this->expectExceptionMessage('CSV_SIGNING_KEY is not configured');
 
-        new HmacSignatureService();
+        new HmacSignatureService('');
     }
 }
