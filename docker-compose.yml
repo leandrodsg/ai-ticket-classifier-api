@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticket-classifier-api
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+      - CACHE_DRIVER=database
+    networks:
+      - ticket-classifier-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: ticket-classifier-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ticket_classifier
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ticket-classifier-network
+
+networks:
+  ticket-classifier-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
