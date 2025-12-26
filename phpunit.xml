@@ -31,5 +31,6 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="CSV_SIGNING_KEY" value="test_csv_signing_key_for_testing_only"/>
     </php>
 </phpunit>

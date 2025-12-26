@@ -9,11 +9,11 @@ class HmacSignatureService
     private string $key;
     private string $algorithm = 'sha256';
 
-    public function __construct()
+    public function __construct(?string $key = null)
     {
-        $this->key = config('app.key');
+        $this->key = $key ?? config('services.csv_signing_key');
         if (!$this->key) {
-            throw new \RuntimeException('APP_KEY is not configured');
+            throw new \RuntimeException('CSV_SIGNING_KEY is not configured');
         }
     }
 
