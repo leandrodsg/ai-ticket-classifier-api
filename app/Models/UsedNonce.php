@@ -12,6 +12,10 @@ class UsedNonce extends Model
 
     public $timestamps = false; // Disable automatic timestamps
 
+    protected $primaryKey = 'nonce'; // Use nonce as primary key
+    public $incrementing = false;   // Primary key is not auto-incrementing
+    protected $keyType = 'string';  // Primary key is a string
+
     protected $fillable = [
         'nonce',
         'used_at',
