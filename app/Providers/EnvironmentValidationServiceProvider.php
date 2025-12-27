@@ -9,11 +9,15 @@ class EnvironmentValidationServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        // Skip validation during Composer operations (CI/CD builds)
-        if ($this->app->runningInConsole() && !$this->app->isBooted()) {
+        // Skip validation for commands that need to run before .env is configured
+        if ($this->app->runningInConsole()) {
             $runningCommand = $_SERVER['argv'][1] ?? '';
-            if (str_contains($runningCommand, 'package:discover')) {
-                return;
+            $allowedCommands = ['package:discover', 'key:generate', 'config:clear', 'cache:clear'];
+            
+            foreach ($allowedCommands as $cmd) {
+                if (str_contains($runningCommand, $cmd)) {
+                    return;
+                }
             }
         }
 
