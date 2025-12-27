@@ -24,4 +24,11 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# WARNING: This command is for LOCAL DEVELOPMENT ONLY
+# php artisan serve is NOT production-ready and should NEVER be used in production
+# For production deployments:
+#   - Use nginx + php-fpm (see nginx.conf)
+#   - Use a process supervisor (e.g., supervisord)
+#   - Configure proper security headers and rate limiting
+# This Dockerfile is designed for local Docker development environments only
 CMD php artisan serve --host=0.0.0.0 --port=8000
