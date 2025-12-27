@@ -111,7 +111,7 @@ class HealthCheckController extends Controller
 
             if (!$apiKey) {
                 return [
-                    'status' => 'unhealthy',
+                    'status' => 'degraded',
                     'message' => 'OpenRouter API key not configured',
                 ];
             }
