@@ -9,16 +9,9 @@ class EnvironmentValidationServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        // Skip validation for commands that need to run before .env is configured
+        // Skip validation for Artisan commands (only validate when serving HTTP requests)
         if ($this->app->runningInConsole()) {
-            $runningCommand = $_SERVER['argv'][1] ?? '';
-            $allowedCommands = ['package:discover', 'key:generate', 'config:clear', 'cache:clear'];
-            
-            foreach ($allowedCommands as $cmd) {
-                if (str_contains($runningCommand, $cmd)) {
-                    return;
-                }
-            }
+            return;
         }
 
         // Validate critical environment variables
