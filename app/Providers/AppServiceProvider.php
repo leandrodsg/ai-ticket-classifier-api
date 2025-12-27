@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Services\Ai\OpenRouterClient::class, function ($app) {
+            $apiKey = config('services.openrouter.api_key') ?: env('OPENROUTER_API_KEY', '');
+            return new \App\Services\Ai\OpenRouterClient($apiKey);
+        });
     }
 
     /**
