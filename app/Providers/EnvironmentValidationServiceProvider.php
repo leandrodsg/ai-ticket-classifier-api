@@ -9,6 +9,14 @@ class EnvironmentValidationServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // Skip validation during Composer operations (CI/CD builds)
+        if ($this->app->runningInConsole() && !$this->app->isBooted()) {
+            $runningCommand = $_SERVER['argv'][1] ?? '';
+            if (str_contains($runningCommand, 'package:discover')) {
+                return;
+            }
+        }
+
         // Validate critical environment variables
         $requiredEnvVars = [
             'APP_KEY' => 'Application encryption key is not set. Run: php artisan key:generate',
