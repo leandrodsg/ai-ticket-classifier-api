@@ -2,24 +2,28 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create test classification jobs and tickets
+        \App\Models\ClassificationJob::factory()
+            ->count(3)
+            ->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create specific jobs with different statuses
+        \App\Models\ClassificationJob::factory()
+            ->pending()
+            ->create();
+
+        \App\Models\ClassificationJob::factory()
+            ->completed()
+            ->create();
+
+        \App\Models\ClassificationJob::factory()
+            ->failed()
+            ->create();
     }
 }
