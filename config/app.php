@@ -43,6 +43,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Security Bypass (Development Only)
+    |--------------------------------------------------------------------------
+    |
+    | CRITICAL SECURITY SETTING: This bypasses HMAC signature validation.
+    | Should ONLY be true in local development/testing environments.
+    | NEVER set this to true in production - it will disable authentication.
+    |
+    */
+
+    'bypass_security' => (bool) env('BYPASS_SECURITY', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |

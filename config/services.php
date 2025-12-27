@@ -41,11 +41,13 @@ return [
 
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY'),
-        'model' => env('OPENROUTER_MODEL', 'meta-llama/llama-3.3-70b-instruct'),
-        'fallback_models' => [
-            env('OPENROUTER_FALLBACK_MODEL_1', 'meta-llama/llama-3.2-3b-instruct'),
-            env('OPENROUTER_FALLBACK_MODEL_2', 'mistralai/mistral-7b-instruct'),
+        'models' => [
+            'primary' => env('OPENROUTER_MODEL_PRIMARY', 'google/gemini-2.0-flash-exp:free'),
+            'fallback_1' => env('OPENROUTER_MODEL_FALLBACK_1', 'xiaomi/mimo-v2-flash:free'),
+            'fallback_2' => env('OPENROUTER_MODEL_FALLBACK_2', 'meta-llama/llama-3.2-3b-instruct:free'),
         ],
+        'timeout_seconds' => env('OPENROUTER_TIMEOUT', 10),
+        'max_retries' => env('OPENROUTER_MAX_RETRIES', 2),
     ],
 
 ];
