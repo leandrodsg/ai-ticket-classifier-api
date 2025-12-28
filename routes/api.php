@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\CsvGenerateController;
 use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\HealthCheckController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,9 @@ Route::get('/health', [HealthCheckController::class, 'check']);
 
 // AI Classification endpoint
 Route::post('/classify', [ClassificationController::class, 'classify']);
+
+// CSV Generate endpoint
+Route::post('/csv/generate', [CsvGenerateController::class, '__invoke']);
 
 // API info endpoint
 Route::get('/info', function () {
