@@ -187,20 +187,33 @@ class CachePerformanceTest extends TestCase
     private function simulateAiClassificationWork(): void
     {
         // Simulate various operations that AI classification might do
-        $data = str_repeat('classification workload simulation ', 1000);
+        $data = str_repeat('classification workload simulation with more complex processing ', 5000);
         $hash = hash('sha256', $data);
-        $json = json_encode(['hash' => $hash, 'length' => strlen($data)]);
+        $json = json_encode(['hash' => $hash, 'length' => strlen($data), 'complexity' => 'high']);
         $decoded = json_decode($json, true);
 
-        // Add some computational work
+        // Add significant computational work (simulate AI processing)
         $result = 0;
-        for ($i = 0; $i < 10000; $i++) {
+        for ($i = 0; $i < 50000; $i++) {
             $result += $i * 2;
+            // Add some string operations to simulate text processing
+            if ($i % 1000 === 0) {
+                $temp = strtoupper(substr($data, 0, 100));
+                $temp = strtolower($temp);
+                $result += strlen($temp);
+            }
+        }
+
+        // Simulate multiple hash operations (like tokenization)
+        for ($i = 0; $i < 100; $i++) {
+            $subHash = hash('md5', $data . $i);
+            $result += hexdec(substr($subHash, 0, 8));
         }
 
         // Verify work was done
         $this->assertGreaterThan(0, $result);
         $this->assertIsArray($decoded);
+        $this->assertEquals('high', $decoded['complexity']);
     }
 
     /**

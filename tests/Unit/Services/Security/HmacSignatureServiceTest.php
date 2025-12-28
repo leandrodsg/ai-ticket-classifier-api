@@ -117,4 +117,29 @@ class HmacSignatureServiceTest extends TestCase
 
         new HmacSignatureService('');
     }
+
+    /** @test */
+    public function it_throws_exception_when_config_is_null()
+    {
+        config(['services.csv.signing_key' => null]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('CSV_SIGNING_KEY is not configured');
+
+        new HmacSignatureService(); // Sem passar key, usa config
+    }
+
+    /** @test */
+    public function it_loads_key_from_config_when_not_provided()
+    {
+        config(['services.csv.signing_key' => 'config_test_key']);
+
+        $service = new HmacSignatureService(); // Sem passar key
+
+        $data = ['test' => 'data'];
+        $signature = $service->generate($data);
+
+        $this->assertIsString($signature);
+        $this->assertEquals(64, strlen($signature));
+    }
 }
