@@ -128,7 +128,7 @@ class RateLimitMiddlewareTest extends TestCase
 
     public function test_generate_endpoint_has_different_limits(): void
     {
-        $request = Request::create('/api/v1/csv/generate', 'POST');
+        $request = Request::create('/api/csv/generate', 'POST');
         $request->server->set('REMOTE_ADDR', '192.168.1.3');
 
         // Make requests up to generate limit

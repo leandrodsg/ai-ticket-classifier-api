@@ -6,12 +6,12 @@ use Illuminate\Support\Str;
 
 class HmacSignatureService
 {
-    private string $key;
+    private ?string $key;
     private string $algorithm = 'sha256';
 
     public function __construct(?string $key = null)
     {
-        $this->key = $key ?? config('services.csv_signing_key');
+        $this->key = $key ?? config('services.csv.signing_key');
         if (!$this->key) {
             throw new \RuntimeException('CSV_SIGNING_KEY is not configured');
         }

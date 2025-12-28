@@ -59,8 +59,8 @@ class RateLimitMiddleware
             ];
         }
 
-        // POST /api/v1/csv/generate or POST /test/generate: 10 per minute
-        if ($method === 'POST' && ($normalizedPath === 'api/v1/csv/generate' || $normalizedPath === 'test/generate')) {
+        // POST /api/csv/generate or POST /test/generate: 10 per minute
+        if ($method === 'POST' && ($normalizedPath === 'api/csv/generate' || $normalizedPath === 'test/generate')) {
             return [
                 'max_attempts' => 10,
                 'decay_seconds' => 60, // 1 minute
@@ -122,10 +122,17 @@ class RateLimitMiddleware
      */
     private function rateLimitExceededResponse(array $limits): SymfonyResponse
     {
-        return response()->json([
+        $response = response()->json([
             'error' => 'rate_limit_exceeded',
             'message' => 'Too many requests. Please try again later.',
         ], 429);
+
+        // Add rate limit headers to error response too
+        $response->headers->set('X-RateLimit-Limit', $limits['max_attempts']);
+        $response->headers->set('X-RateLimit-Remaining', 0);
+        $response->headers->set('X-RateLimit-Reset', time() + $limits['decay_seconds']);
+
+        return $response;
     }
 
     /**
