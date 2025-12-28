@@ -18,20 +18,22 @@ class NonceService
 
     /**
      * Validate nonce (check if not used before)
+     * Uses database UNIQUE constraint to prevent race conditions
      */
     public function validate(string $nonce): bool
     {
-        // Check if nonce exists in database
-        $exists = UsedNonce::where('nonce', $nonce)->exists();
-
-        if ($exists) {
-            return false; // Replay attack detected
+        try {
+            // Try to insert nonce (will fail if already exists due to UNIQUE constraint)
+            $this->markAsUsed($nonce, Carbon::now()->addHour());
+            return true; // First time using this nonce
+        } catch (\Illuminate\Database\QueryException $e) {
+            // SQLSTATE[23000] = UNIQUE constraint violation
+            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'UNIQUE constraint')) {
+                return false; // Nonce already used (replay attack detected)
+            }
+            // Re-throw unexpected database errors
+            throw $e;
         }
-
-        // Mark as used with 1 hour expiration
-        $this->markAsUsed($nonce, Carbon::now()->addHour());
-
-        return true;
     }
 
     /**

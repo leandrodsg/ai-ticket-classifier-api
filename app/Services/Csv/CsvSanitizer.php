@@ -27,6 +27,31 @@ class CsvSanitizer
     }
 
     /**
+     * Sanitize a single field with multiple protection layers
+     */
+    private function sanitizeField(string $value): string
+    {
+        // Step 1: Remove formula injection characters
+        $value = $this->removeFormulaChars($value);
+        
+        // Step 2: Remove control characters (NULL bytes, etc)
+        $value = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/', '', $value);
+        
+        // Step 3: Limit length to prevent buffer overflow (max 5KB per field)
+        $value = mb_substr($value, 0, 5000);
+        
+        // Step 4: Escape quotes
+        $value = $this->escapeQuotes($value);
+        
+        // Step 5: Wrap in quotes if contains special characters
+        if ($this->needsQuotes($value)) {
+            $value = '"' . $value . '"';
+        }
+        
+        return $value;
+    }
+
+    /**
      * Remove formula injection characters from a value
      */
     public function removeFormulaChars(string $value): string
@@ -48,14 +73,13 @@ class CsvSanitizer
 
     /**
      * Wrap value in quotes if it contains special characters
+     * Public method for testing
      */
     public function wrapInQuotes(string $value): string
     {
-        // Check if value contains comma, newline, or quote
-        if (preg_match('/[,"\\n\\r]/', $value)) {
+        if ($this->needsQuotes($value)) {
             return '"' . $value . '"';
         }
-
         return $value;
     }
 
@@ -89,20 +113,12 @@ class CsvSanitizer
     }
 
     /**
-     * Sanitize a single field value
+     * Check if value needs to be wrapped in quotes
      */
-    private function sanitizeField(string $value): string
+    private function needsQuotes(string $value): bool
     {
-        // Step 1: Remove formula injection characters
-        $value = $this->removeFormulaChars($value);
-
-        // Step 2: Escape quotes
-        $value = $this->escapeQuotes($value);
-
-        // Step 3: Wrap in quotes if needed
-        $value = $this->wrapInQuotes($value);
-
-        return $value;
+        // Check if value contains comma, newline, or quote
+        return preg_match('/[,"\n\r]/', $value) === 1;
     }
 
     /**

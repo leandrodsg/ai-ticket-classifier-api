@@ -3,6 +3,7 @@
 namespace App\Services\Cache;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class ClassificationCacheRepository
 {
@@ -22,15 +23,28 @@ class ClassificationCacheRepository
         $cached = Cache::get($key);
 
         if ($cached === null) {
+            Log::info('Cache miss', [
+                'ticket' => $ticket['issue_key'] ?? 'unknown',
+                'cache_key' => $key,
+            ]);
             return null;
         }
 
         // Ensure cached data is valid array
         if (!is_array($cached)) {
+            Log::warning('Invalid cache data', [
+                'ticket' => $ticket['issue_key'] ?? 'unknown',
+                'cache_key' => $key,
+            ]);
             // Remove invalid cache entry
             Cache::forget($key);
             return null;
         }
+
+        Log::info('Cache hit', [
+            'ticket' => $ticket['issue_key'] ?? 'unknown',
+            'cache_key' => $key,
+        ]);
 
         return $cached;
     }
@@ -46,6 +60,12 @@ class ClassificationCacheRepository
         $key = $this->generateCacheKey($ticket);
 
         Cache::put($key, $classification, now()->addMinutes(self::CACHE_TTL_MINUTES));
+
+        Log::info('Cache set', [
+            'ticket' => $ticket['issue_key'] ?? 'unknown',
+            'cache_key' => $key,
+            'ttl_minutes' => self::CACHE_TTL_MINUTES,
+        ]);
     }
 
     /**
