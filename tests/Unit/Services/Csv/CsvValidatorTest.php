@@ -40,23 +40,24 @@ class CsvValidatorTest extends TestCase
     /** @test */
     public function it_rejects_schema_with_invalid_rows()
     {
+        $this->expectException(\App\Exceptions\ValidationException::class);
+        
         $rows = [
             [
                 'issue_key' => 'PROJ-123',
-                'summary' => 'Valid',
-                'description' => 'Valid description',
+                'summary' => 'Valid summary text',
+                'description' => 'Valid description text',
                 'reporter' => 'user@example.com'
             ],
             [
-                'issue_key' => 'INVALID',
-                'summary' => 'Valid summary',
-                'description' => 'Valid description',
-                'reporter' => 'user@example.com'
+                'issue_key' => 'INVALID',  // Invalid format (no number)
+                'summary' => 'Hi',         // Too short (min 5)
+                'description' => 'Short',  // Too short (min 10)
+                'reporter' => 'not-email'  // Invalid email
             ]
         ];
 
-        $result = $this->validator->validateSchema($rows);
-        $this->assertFalse($result);
+        $this->validator->validateSchema($rows);
     }
 
     /** @test */

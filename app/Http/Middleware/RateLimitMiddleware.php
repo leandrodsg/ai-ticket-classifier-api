@@ -50,8 +50,12 @@ class RateLimitMiddleware
         // Normalize path (remove leading slash)
         $normalizedPath = ltrim($path, '/');
 
-        // POST /api/v1/tickets/upload or POST /test/upload: 25 per hour
-        if ($method === 'POST' && ($normalizedPath === 'api/v1/tickets/upload' || $normalizedPath === 'test/upload')) {
+        // POST /api/tickets/upload or POST /api/v1/tickets/upload or POST /test/upload: 25 per hour
+        if ($method === 'POST' && (
+            $normalizedPath === 'api/tickets/upload' ||
+            $normalizedPath === 'api/v1/tickets/upload' ||
+            $normalizedPath === 'test/upload'
+        )) {
             return [
                 'max_attempts' => 25,
                 'decay_seconds' => 3600, // 1 hour

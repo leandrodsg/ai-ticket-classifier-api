@@ -17,6 +17,7 @@ class ClassificationJob extends Model
         'total_tickets',
         'processed_tickets',
         'results',
+        'error_message',
         'processing_time_ms',
         'completed_at',
     ];

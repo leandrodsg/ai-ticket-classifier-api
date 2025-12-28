@@ -27,6 +27,7 @@ return new class extends Migration
             $table->timestamp('sla_due_date')->nullable();
             $table->text('reasoning')->nullable();
             $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable();
             
             $table->index('job_id');
             $table->index('category');

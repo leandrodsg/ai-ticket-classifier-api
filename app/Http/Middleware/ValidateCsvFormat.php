@@ -131,26 +131,19 @@ class ValidateCsvFormat
                 ], 422);
             }
 
-            // Validate data rows
-            if (!$this->validator->validateSchema($parsed['data_rows'])) {
-                $errors = [];
-                foreach ($parsed['data_rows'] as $index => $row) {
-                    $rowErrors = $this->validator->validateRow($row);
-                    if (!empty($rowErrors)) {
-                        $errors["row_" . ($index + 1)] = $rowErrors;
-                    }
-                }
+            // Validate data rows (throws ValidationException if invalid)
+            $this->validator->validateSchema($parsed['data_rows']);
 
-                return response()->json([
-                    'success' => false,
-                    'error' => 'VALIDATION_FAILED',
-                    'message' => 'CSV data validation failed',
-                    'details' => [
-                        'errors' => $errors
-                    ]
-                ], 422);
-            }
-
+        } catch (\App\Exceptions\ValidationException $e) {
+            // ValidationException from validator - return 422
+            return response()->json([
+                'success' => false,
+                'error' => 'VALIDATION_FAILED',
+                'message' => $e->getMessage(),
+                'details' => [
+                    'errors' => $e->getErrors()
+                ]
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
