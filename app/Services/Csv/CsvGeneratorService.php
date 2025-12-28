@@ -16,7 +16,7 @@ class CsvGeneratorService
     }
 
     /**
-     * Generate array of realistic sample tickets in Portuguese
+     * Generate array of realistic sample tickets
      */
     private function generateSampleTickets(int $count): array
     {
@@ -44,7 +44,7 @@ class CsvGeneratorService
     }
 
     /**
-     * Get predefined ticket templates with realistic Portuguese content
+     * Get predefined ticket templates with realistic sample content
      */
     private function getTicketTemplates(): array
     {
@@ -52,60 +52,60 @@ class CsvGeneratorService
             // Technical Support - Login Issues
             [
                 'issue_type' => 'Support',
-                'summary' => 'Não consigo acessar minha conta após redefinição de senha',
-                'description' => 'Usuário reporta que não consegue fazer login na conta após redefinir a senha. Aparece mensagem de erro "Credenciais inválidas". O usuário tentou múltiplas vezes com a senha correta. Navegador: Chrome 120, SO: Windows 11.',
-                'reporter' => 'joao.silva@empresa.com',
-                'assignee' => 'suporte@empresa.com',
+                'summary' => 'Cannot access account after password reset',
+                'description' => 'User reports unable to login to account after resetting password. Error message "Invalid credentials" appears. User tried multiple times with correct password. Browser: Chrome 120, OS: Windows 11.',
+                'reporter' => 'john.smith@company.com',
+                'assignee' => 'support@company.com',
                 'priority' => 'High',
                 'status' => 'Open',
-                'labels' => 'login;acesso;autenticacao',
+                'labels' => 'login;access;authentication',
             ],
             // Billing Issue
             [
                 'issue_type' => 'Bug',
-                'summary' => 'Processamento de pagamentos falha para valores acima de R$ 1000',
-                'description' => 'Gateway de pagamento retorna erro 500 ao processar cartões de crédito com valores superiores a R$ 1000. Afeta assinaturas premium. Múltiplos clientes reportaram o mesmo problema nas últimas 2 horas. IDs de transação: TXN-001, TXN-002.',
-                'reporter' => 'maria.santos@billing.com',
+                'summary' => 'Payment processing fails for amounts over $1000',
+                'description' => 'Payment gateway returns error 500 when processing credit cards with amounts over $1000. Affects premium subscriptions. Multiple customers reported same issue in last 2 hours. Transaction IDs: TXN-001, TXN-002.',
+                'reporter' => 'mary.jones@billing.com',
                 'priority' => 'High',
                 'status' => 'Open',
-                'labels' => 'pagamento;faturamento;gateway',
+                'labels' => 'payment;billing;gateway',
             ],
             // Feature Request
             [
                 'issue_type' => 'Story',
-                'summary' => 'Adicionar modo escuro no aplicativo mobile',
-                'description' => 'Múltiplos usuários solicitaram recurso de modo escuro para melhor uso noturno. Melhoraria significativamente a experiência do usuário. Recurso similar já existe na versão web. Esforço estimado: 2 sprints.',
-                'reporter' => 'carlos.oliveira@users.com',
+                'summary' => 'Add dark mode to mobile application',
+                'description' => 'Multiple users requested dark mode feature for better nighttime usage. Would significantly improve user experience. Similar feature already exists in web version. Estimated effort: 2 sprints.',
+                'reporter' => 'carlos.rodriguez@users.com',
                 'priority' => 'Medium',
                 'status' => 'Open',
-                'labels' => 'mobile;ui;melhoria',
+                'labels' => 'mobile;ui;enhancement',
             ],
             // General Question
             [
                 'issue_type' => 'Task',
-                'summary' => 'Como alterar configurações de notificações por email',
-                'description' => 'Usuário quer reduzir a frequência de notificações por email. Não consegue encontrar a página de configurações. Guia do usuário não tem instruções claras.',
-                'reporter' => 'ana.pereira@cliente.com',
+                'summary' => 'How to change email notification settings',
+                'description' => 'User wants to reduce email notification frequency. Cannot find settings page. User guide does not have clear instructions.',
+                'reporter' => 'anna.davis@client.com',
                 'priority' => 'Low',
                 'status' => 'Open',
-                'labels' => 'configuracoes;email;documentacao',
+                'labels' => 'settings;email;documentation',
             ],
             // Critical System Outage
             [
                 'issue_type' => 'Incident',
-                'summary' => 'Falha de conexão com banco de dados de produção',
-                'description' => 'Todos os usuários estão enfrentando erros 503. Pool de conexões do banco de dados esgotado. Iniciado às 14:30 UTC. Impacto estimado em R$ 10.000/hora. Equipe de operações investigando.',
-                'reporter' => 'ops.team@empresa.com',
+                'summary' => 'Database connection failure in production',
+                'description' => 'All users experiencing 503 errors. Database connection pool exhausted. Started at 14:30 UTC. Estimated impact $10,000/hour. Operations team investigating.',
+                'reporter' => 'ops.team@company.com',
                 'priority' => 'Critical',
                 'status' => 'In Progress',
-                'labels' => 'outage;banco;critico',
+                'labels' => 'outage;database;critical',
             ],
             // Performance Issue
             [
                 'issue_type' => 'Bug',
-                'summary' => 'Página de dashboard carrega muito lentamente',
-                'description' => 'Página do dashboard está demorando mais de 10 segundos para carregar. Afeta experiência do usuário. Problema relatado por 50+ usuários nas últimas 24 horas. Possível problema de performance no backend.',
-                'reporter' => 'performance.team@empresa.com',
+                'summary' => 'Dashboard page loads very slowly',
+                'description' => 'Dashboard page is taking more than 10 seconds to load. Affects user experience. Problem reported by 50+ users in last 24 hours. Possible backend performance issue.',
+                'reporter' => 'performance.team@company.com',
                 'priority' => 'Medium',
                 'status' => 'Open',
                 'labels' => 'performance;dashboard;backend',
@@ -113,42 +113,42 @@ class CsvGeneratorService
             // Security Concern
             [
                 'issue_type' => 'Bug',
-                'summary' => 'Possível vulnerabilidade de injeção SQL em formulário de contato',
-                'description' => 'Equipe de segurança identificou possível vulnerabilidade de injeção SQL no formulário de contato. Parâmetros não estão sendo sanitizados adequadamente. Necessária correção urgente para prevenir exploração.',
-                'reporter' => 'security@empresa.com',
+                'summary' => 'Possible SQL injection vulnerability in contact form',
+                'description' => 'Security team identified possible SQL injection vulnerability in contact form. Parameters are not being sanitized properly. Urgent fix needed to prevent exploitation.',
+                'reporter' => 'security@company.com',
                 'priority' => 'Critical',
                 'status' => 'Open',
-                'labels' => 'seguranca;sql;vulnerabilidade',
+                'labels' => 'security;sql;vulnerability',
             ],
             // Integration Issue
             [
                 'issue_type' => 'Bug',
-                'summary' => 'Integração com API externa falhando intermitentemente',
-                'description' => 'API de integração com serviço terceiro está falhando com erro 502 aproximadamente 15% das vezes. Logs mostram timeout na comunicação. Afeta sincronização de dados críticos.',
-                'reporter' => 'integration.team@empresa.com',
+                'summary' => 'External API integration failing intermittently',
+                'description' => 'Third-party API integration is failing with error 502 approximately 15% of the time. Logs show communication timeout. Affects critical data synchronization.',
+                'reporter' => 'integration.team@company.com',
                 'priority' => 'High',
                 'status' => 'In Progress',
-                'labels' => 'integracao;api;timeout',
+                'labels' => 'integration;api;timeout',
             ],
             // Documentation Request
             [
                 'issue_type' => 'Task',
-                'summary' => 'Atualizar documentação da API com novos endpoints',
-                'description' => 'Documentação da API precisa ser atualizada para incluir os novos endpoints adicionados na versão 2.0. Exemplos de código e casos de uso devem ser incluídos.',
-                'reporter' => 'docs.team@empresa.com',
+                'summary' => 'Update API documentation with new endpoints',
+                'description' => 'API documentation needs to be updated to include new endpoints added in version 2.0. Code examples and use cases should be included.',
+                'reporter' => 'docs.team@company.com',
                 'priority' => 'Low',
                 'status' => 'Open',
-                'labels' => 'documentacao;api;atualizacao',
+                'labels' => 'documentation;api;update',
             ],
             // Data Migration Issue
             [
                 'issue_type' => 'Bug',
-                'summary' => 'Migração de dados corrompeu registros de usuários antigos',
-                'description' => 'Processo de migração executado ontem corrompeu dados de usuários criados antes de 2020. Informações de contato e preferências foram perdidas. Impacto em aproximadamente 5% da base de usuários.',
-                'reporter' => 'data.team@empresa.com',
+                'summary' => 'Data migration corrupted old user records',
+                'description' => 'Migration process run yesterday corrupted user data created before 2020. Contact information and preferences were lost. Impact on approximately 5% of user base.',
+                'reporter' => 'data.team@company.com',
                 'priority' => 'High',
                 'status' => 'Open',
-                'labels' => 'migracao;dados;corrupcao',
+                'labels' => 'migration;data;corruption',
             ],
         ];
     }
