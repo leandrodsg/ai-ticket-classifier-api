@@ -2,7 +2,7 @@
 
 namespace App\Services\Csv;
 
-use Illuminate\Support\Facades\Validator;
+use App\Exceptions\ValidationException;
 
 class CsvValidator
 {
@@ -12,14 +12,23 @@ class CsvValidator
     public function validateSchema(array $rows): bool
     {
         if (empty($rows)) {
-            return false;
+            throw new ValidationException('CSV must contain at least one data row');
         }
 
-        foreach ($rows as $row) {
+        if (count($rows) > 50) {
+            throw new ValidationException('CSV cannot contain more than 50 tickets');
+        }
+
+        $allErrors = [];
+        foreach ($rows as $index => $row) {
             $errors = $this->validateRow($row);
             if (!empty($errors)) {
-                return false;
+                $allErrors["row_" . ($index + 1)] = $errors; // +1 because rows are 0-indexed but users expect 1-indexed
             }
+        }
+
+        if (!empty($allErrors)) {
+            throw new ValidationException('CSV validation failed', $allErrors);
         }
 
         return true;

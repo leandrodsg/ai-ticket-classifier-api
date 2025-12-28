@@ -343,21 +343,16 @@ class ValidateCsvFormatTest extends TestCase
                     'expires_at' => date('Y-m-d H:i:s')
                 ],
                 'data_rows' => [
-                    ['issue_key' => 'TEST-1', 'summary' => 'Valid'],
-                    ['issue_key' => 'TEST-2', 'summary' => ''] // Invalid: empty summary
+                    ['issue_key' => 'TEST-1', 'summary' => 'Valid summary text', 'description' => 'Valid description text here', 'reporter' => 'valid@example.com'],
+                    ['issue_key' => 'INVALID', 'summary' => 'Hi', 'description' => 'Short', 'reporter' => 'not-email'] // Invalid: all fields wrong
                 ]
             ]);
 
         $this->validator->expects($this->once())
             ->method('validateSchema')
-            ->willReturn(false);
-
-        $this->validator->expects($this->exactly(2))
-            ->method('validateRow')
-            ->willReturnOnConsecutiveCalls(
-                [], // First row is valid
-                ['summary' => 'Summary is required'] // Second row has error
-            );
+            ->willThrowException(new \App\Exceptions\ValidationException('CSV validation failed', [
+                'row_2' => ['issue_key' => 'Invalid format', 'summary' => 'Too short', 'description' => 'Too short', 'reporter' => 'Invalid email']
+            ]));
 
         $request = Request::create('/api/classify', 'POST', [
             'csv_content' => $csvContent
