@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('total_tickets')->default(0);
             $table->integer('processed_tickets')->default(0);
             $table->json('results')->nullable();
+            $table->text('error_message')->nullable(); // Store error details for failed jobs
             $table->integer('processing_time_ms')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('completed_at')->nullable();
