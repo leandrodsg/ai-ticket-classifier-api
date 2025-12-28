@@ -14,7 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // No rate limiting configured (requires Redis/database cache)
+        // Rate limiting middleware for API protection
+        $middleware->api(prepend: [
+            \App\Http\Middleware\RateLimitMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Custom error handling for production
