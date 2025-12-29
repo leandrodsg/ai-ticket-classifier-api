@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\CsvGenerateController;
+use App\Http\Controllers\Api\V1\TicketQueryController;
 use App\Http\Controllers\Api\V1\TicketUploadController;
 use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\HealthCheckController;
@@ -29,6 +30,9 @@ Route::post('/csv/generate', [CsvGenerateController::class, '__invoke']);
 
 // Ticket Upload endpoint
 Route::post('/tickets/upload', [TicketUploadController::class, '__invoke']);
+
+// Ticket Query endpoint
+Route::get('/tickets/{id}', [TicketQueryController::class, 'show']);
 
 // API info endpoint
 Route::get('/info', function () {

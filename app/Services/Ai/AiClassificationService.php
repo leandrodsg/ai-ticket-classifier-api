@@ -24,7 +24,6 @@ class AiClassificationService
     {
         $startTime = microtime(true);
 
-        // Tenta modelos padrão primeiro
         foreach ($this->models as $model) {
             try {
                 $result = $this->tryModel($model, $ticket, $startTime);
@@ -53,7 +52,6 @@ class AiClassificationService
             }
         }
 
-        // Se todos os modelos padrão falharam, tenta auto-discovery
         if (config('ai.fallback.use_discovery_on_failure')) {
             return $this->tryDiscoveredModels($ticket, $startTime);
         }
@@ -113,14 +111,6 @@ class AiClassificationService
         }
     }
 
-    /**
-     * Tenta usar modelos descobertos automaticamente como último recurso.
-     *
-     * @param array $ticket Dados do ticket
-     * @param float $startTime Timestamp de início
-     * @return array Classificação
-     * @throws AllModelsFailedException
-     */
     private function tryDiscoveredModels(array $ticket, float $startTime): array
     {
         Log::info('Tentando modelos descobertos via auto-discovery', [

@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Log;
 class OpenRouterClient
 {
     private const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
-    private const MAX_RETRIES = 2; // 3 tentativas totais por modelo
-    private const TIMEOUT_SECONDS = 15; // 15 segundos por tentativa
+    private const MAX_RETRIES = 2;
+    private const TIMEOUT_SECONDS = 15;
     private const TEST_TIMEOUT_SECONDS = 20; // 20 segundos em ambiente de teste
 
     public function __construct(
@@ -18,7 +18,6 @@ class OpenRouterClient
 
     public function callApi(string $model, array $messages): array
     {
-        // Reduzir tentativas em ambiente de teste para evitar timeout
         $maxRetries = app()->environment('testing') ? 0 : self::MAX_RETRIES;
         
         $attempts = 0;
@@ -63,7 +62,7 @@ class OpenRouterClient
         $payload = [
             'model' => $model,
             'messages' => $messages,
-            'temperature' => 0.1, // Baixa temperatura para consistência
+            'temperature' => 0.1,
             'max_tokens' => 1000,
             'response_format' => ['type' => 'json_object']
         ];
@@ -79,7 +78,6 @@ class OpenRouterClient
                 'X-Title' => 'AI Ticket Classifier'
             ]);
 
-        // Desabilitar verificação SSL apenas em ambiente de teste
         if (app()->environment('testing')) {
             $httpClient = $httpClient->withoutVerifying();
         }
