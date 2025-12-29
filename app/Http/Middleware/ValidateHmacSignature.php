@@ -21,10 +21,22 @@ class ValidateHmacSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // SECURITY: Only bypass validation if explicitly enabled via env variable
-        // This should NEVER be true in production environments
-        if (config('app.bypass_security', false)) {
-            Log::warning('Security bypass is enabled - this should only be used in development', [
+        // CRITICAL SECURITY CHECK: Prevent security bypass in production
+        if (config('app.bypass_security') && app()->environment('production')) {
+            Log::critical('SECURITY BYPASS IS ENABLED IN PRODUCTION - CRITICAL VULNERABILITY', [
+                'ip' => $request->ip(),
+                'path' => $request->path(),
+            ]);
+            
+            throw new \RuntimeException(
+                'SECURITY BYPASS IS ENABLED IN PRODUCTION - THIS IS A CRITICAL SECURITY VULNERABILITY'
+            );
+        }
+
+        // SECURITY: Only bypass validation in local/testing environments
+        // This should NEVER be enabled in production
+        if (app()->environment('local', 'testing') && config('app.bypass_security', false)) {
+            Log::warning('Security bypass is enabled - DEVELOPMENT ONLY', [
                 'environment' => app()->environment(),
                 'ip' => $request->ip(),
                 'path' => $request->path(),
