@@ -254,7 +254,7 @@ class ValidateHmacSignatureTest extends TestCase
 
         Log::shouldReceive('warning')
             ->once()
-            ->with('Security bypass is enabled - this should only be used in development', \Mockery::any());
+            ->with('Security bypass is enabled - DEVELOPMENT ONLY', \Mockery::any());
 
         $response = $this->middleware->handle($request, function ($req) {
             return response()->json(['success' => true]);
