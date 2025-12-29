@@ -5,5 +5,5 @@ builder = "DOCKERFILE"
 startCommand = "frankenphp php-server --workers 4 --listen :$PORT"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
-restartPolicyType = "on-failure"
+restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
