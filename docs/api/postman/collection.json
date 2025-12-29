@@ -1,0 +1,443 @@
+{
+  "info": {
+    "name": "AI Ticket Classifier API",
+    "description": "Complete collection for testing the AI Ticket Classifier API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "csvContent",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "signature",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "nonce",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "timestamp",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Generate CSV",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success=true', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.success).to.be.true;",
+              "});",
+              "",
+              "pm.test('CSV content is base64 encoded', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.data.csv_content).to.be.a('string');",
+              "    pm.expect(json.data.csv_content.length).to.be.above(0);",
+              "});",
+              "",
+              "// Store variables for next request",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('sessionId', json.data.session_id);",
+              "pm.collectionVariables.set('csvContent', json.data.csv_content);",
+              "",
+              "// Decode CSV and extract metadata",
+              "const csvDecoded = atob(json.data.csv_content);",
+              "const lines = csvDecoded.split('\\n');",
+              "",
+              "lines.forEach(line => {",
+              "    if (line.startsWith('# X-Signature:')) {",
+              "        pm.collectionVariables.set('signature', line.split(': ')[1].trim());",
+              "    } else if (line.startsWith('# X-Nonce:')) {",
+              "        pm.collectionVariables.set('nonce', line.split(': ')[1].trim());",
+              "    } else if (line.startsWith('# X-Timestamp:')) {",
+              "        pm.collectionVariables.set('timestamp', line.split(': ')[1].trim());",
+              "    }",
+              "});",
+              "",
+              "console.log('Session ID:', json.data.session_id);",
+              "console.log('Signature:', pm.collectionVariables.get('signature'));",
+              "console.log('Nonce:', pm.collectionVariables.get('nonce'));",
+              "console.log('Timestamp:', pm.collectionVariables.get('timestamp'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ticket_count\": 5\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/csv/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["csv", "generate"]
+        },
+        "description": "Generate a CSV file with test tickets. This endpoint creates 5 sample tickets with valid metadata including HMAC signature, nonce, and timestamp."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Upload CSV",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Ensure we have required metadata from previous request",
+              "if (!pm.collectionVariables.get('csvContent')) {",
+              "    throw new Error('Run \"1. Generate CSV\" first to get CSV content');",
+              "}",
+              "",
+              "if (!pm.collectionVariables.get('signature')) {",
+              "    throw new Error('Missing signature. Run \"1. Generate CSV\" first');",
+              "}",
+              "",
+              "if (!pm.collectionVariables.get('nonce')) {",
+              "    throw new Error('Missing nonce. Run \"1. Generate CSV\" first');",
+              "}",
+              "",
+              "if (!pm.collectionVariables.get('timestamp')) {",
+              "    throw new Error('Missing timestamp. Run \"1. Generate CSV\" first');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Job created successfully', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.success).to.be.true;",
+              "    pm.expect(json.data.status).to.equal('pending');",
+              "});",
+              "",
+              "pm.test('Session ID matches', function () {",
+              "    const json = pm.response.json();",
+              "    const expectedSessionId = pm.collectionVariables.get('sessionId');",
+              "    pm.expect(json.data.session_id).to.equal(expectedSessionId);",
+              "});",
+              "",
+              "pm.test('Total tickets is 5', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.data.total_tickets).to.equal(5);",
+              "});",
+              "",
+              "console.log('Job created:', pm.response.json().data);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Signature",
+            "value": "{{signature}}"
+          },
+          {
+            "key": "X-Nonce",
+            "value": "{{nonce}}"
+          },
+          {
+            "key": "X-Timestamp",
+            "value": "{{timestamp}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"csv_content\": \"{{csvContent}}\",\n  \"file_name\": \"support_tickets.csv\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/tickets/upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "upload"]
+        },
+        "description": "Upload the generated CSV for classification. Requires metadata headers from the CSV generation step."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Query Job Status",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get('sessionId')) {",
+              "    throw new Error('Run \"2. Upload CSV\" first to get session ID');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has valid status', function () {",
+              "    const json = pm.response.json();",
+              "    const validStatuses = ['pending', 'processing', 'completed', 'failed'];",
+              "    pm.expect(validStatuses).to.include(json.data.status);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const status = json.data.status;",
+              "",
+              "if (status === 'completed') {",
+              "    pm.test('Completed job has tickets', function () {",
+              "        pm.expect(json.data.tickets).to.be.an('array');",
+              "        pm.expect(json.data.tickets.length).to.be.above(0);",
+              "    });",
+              "    ",
+              "    pm.test('All tickets have required fields', function () {",
+              "        const ticket = json.data.tickets[0];",
+              "        pm.expect(ticket).to.have.property('issue_key');",
+              "        pm.expect(ticket).to.have.property('category');",
+              "        pm.expect(ticket).to.have.property('priority');",
+              "        pm.expect(ticket).to.have.property('urgency');",
+              "        pm.expect(ticket).to.have.property('impact');",
+              "        pm.expect(ticket).to.have.property('sentiment');",
+              "        pm.expect(ticket).to.have.property('confidence_score');",
+              "    });",
+              "    ",
+              "    console.log('✅ Job completed successfully!');",
+              "    console.log('Total tickets:', json.data.results.total_tickets);",
+              "    console.log('Processing time:', json.data.results.processing_time_ms + 'ms');",
+              "} else if (status === 'failed') {",
+              "    console.log('❌ Job failed:', json.data.error_message);",
+              "} else {",
+              "    console.log('⏳ Job status:', status);",
+              "    console.log('Wait a few seconds and run this request again');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/tickets/{{sessionId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "{{sessionId}}"]
+        },
+        "description": "Query the status of a classification job. Run multiple times until status is 'completed' or 'failed'."
+      },
+      "response": []
+    },
+    {
+      "name": "4. API Info",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has version info', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.data).to.have.property('version');",
+              "    pm.expect(json.data).to.have.property('endpoints');",
+              "});",
+              "",
+              "pm.test('Has 4 documented endpoints', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.data.endpoints).to.be.an('array');",
+              "    pm.expect(json.data.endpoints.length).to.equal(4);",
+              "});",
+              "",
+              "console.log('API Version:', pm.response.json().data.version);",
+              "console.log('Endpoints:', pm.response.json().data.endpoints);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/info",
+          "host": ["{{baseUrl}}"],
+          "path": ["info"]
+        },
+        "description": "Get API version and available endpoints information."
+      },
+      "response": []
+    },
+    {
+      "name": "Error: Invalid Ticket Count",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 422', function () {",
+              "    pm.response.to.have.status(422);",
+              "});",
+              "",
+              "pm.test('Response indicates validation error', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.success).to.be.false;",
+              "    pm.expect(json.message).to.include('validation');",
+              "});",
+              "",
+              "console.log('Validation error:', pm.response.json());"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ticket_count\": 150\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/csv/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["csv", "generate"]
+        },
+        "description": "Example of validation error: ticket_count exceeds maximum of 100."
+      },
+      "response": []
+    },
+    {
+      "name": "Error: Missing Signature",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Response indicates missing signature', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.success).to.be.false;",
+              "    pm.expect(json.message).to.include('signature');",
+              "});",
+              "",
+              "console.log('Authentication error:', pm.response.json());"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"csv_content\": \"IyBYLVNlc3Npb24tSWQ6IDEyMzQ1Njc4LWFiY2QtZWZnaC1pamts\",\n  \"file_name\": \"test.csv\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/tickets/upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "upload"]
+        },
+        "description": "Example of authentication error: missing required X-Signature header."
+      },
+      "response": []
+    },
+    {
+      "name": "Error: Invalid Session ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('Response indicates job not found', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.success).to.be.false;",
+              "    pm.expect(json.message).to.include('not found');",
+              "});",
+              "",
+              "console.log('Not found error:', pm.response.json());"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/tickets/00000000-0000-0000-0000-000000000000",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "00000000-0000-0000-0000-000000000000"]
+        },
+        "description": "Example of not found error: querying non-existent session ID."
+      },
+      "response": []
+    }
+  ]
+}
