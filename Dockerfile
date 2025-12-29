@@ -13,6 +13,9 @@ RUN install-php-extensions \
     bcmath \
     mbstring
 
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 # Set working directory
 WORKDIR /app
 
