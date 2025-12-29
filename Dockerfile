@@ -2,7 +2,7 @@
 # FrankenPHP is a modern application server for PHP built on top of Caddy
 # https://frankenphp.dev/
 
-FROM dunglas/frankenphp:latest-php8.5
+FROM dunglas/frankenphp:latest-php8.3
 
 # Install system dependencies
 RUN install-php-extensions \
