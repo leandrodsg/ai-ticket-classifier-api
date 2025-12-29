@@ -21,7 +21,7 @@ class DiscoverAiModels extends Command
      *
      * @var string
      */
-    protected $description = 'Descobre modelos AI gratuitos disponíveis no OpenRouter';
+    protected $description = 'Discover available free AI models on OpenRouter';
 
     /**
      * Execute the console command.
@@ -57,12 +57,11 @@ class DiscoverAiModels extends Command
             $this->displayTable($models);
         }
 
-        // Recomendações
         $this->newLine();
-        $this->info('💡 Recomendações:');
-        $this->comment('  • Use os top 3 modelos como default_models no config/ai.php');
-        $this->comment('  • Teste cada modelo antes de usar em produção');
-        $this->comment('  • Atualize .env com os melhores modelos');
+        $this->info('💡 Recommendations:');
+        $this->comment('  • Use top 3 models as default_models in config/ai.php');
+        $this->comment('  • Test each model before using in production');
+        $this->comment('  • Update .env with the best models');
 
         return Command::SUCCESS;
     }

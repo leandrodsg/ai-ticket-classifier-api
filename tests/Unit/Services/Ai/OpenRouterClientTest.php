@@ -39,8 +39,6 @@ class OpenRouterClientTest extends TestCase
 
     public function test_retry_on_timeout()
     {
-        // Em ambiente de teste, MAX_RETRIES = 0, então apenas 1 tentativa
-        // Este teste verifica que a primeira falha lança exceção imediatamente
         Http::fake([
             'https://openrouter.ai/api/v1/chat/completions' => Http::response([], 500)
         ]);
@@ -55,8 +53,6 @@ class OpenRouterClientTest extends TestCase
 
     public function test_exponential_backoff_timing()
     {
-        // Em ambiente de teste, não há retries, então não há backoff
-        // Este teste verifica que falha rapidamente sem delay
         $startTime = microtime(true);
 
         Http::fake([
@@ -67,7 +63,7 @@ class OpenRouterClientTest extends TestCase
         
         try {
             $this->client->callApi('test-model', $messages);
-            $this->fail('Deveria ter lançado exceção');
+            $this->fail('Should have thrown exception');
         } catch (\Exception $e) {
             $endTime = microtime(true);
             $duration = $endTime - $startTime;

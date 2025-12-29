@@ -112,7 +112,7 @@ class ClassificationJobTest extends TestCase
     public function test_non_fillable_fields_are_guarded(): void
     {
         $job = ClassificationJob::create([
-            'id' => 'forced-id',  // Não está em fillable
+            'id' => 'forced-id',
             'session_id' => 'test-session',
             'status' => 'completed',
         ]);

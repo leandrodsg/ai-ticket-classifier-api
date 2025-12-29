@@ -69,7 +69,7 @@ class CsvGeneratorServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_generates_realistic_portuguese_content()
+    public function it_generates_realistic_content()
     {
         $csv = $this->generator->generate(1);
 
@@ -80,18 +80,17 @@ class CsvGeneratorServiceTest extends TestCase
         $summary = $columns[2];
         $description = $columns[3];
 
-        // Should contain Portuguese words
-        $portugueseWords = ['não', 'usuário', 'conta', 'problema', 'erro', 'acesso'];
-        $hasPortuguese = false;
+        $commonWords = ['user', 'account', 'problem', 'error', 'access', 'issue', 'cannot'];
+        $hasRealisticContent = false;
 
-        foreach ($portugueseWords as $word) {
+        foreach ($commonWords as $word) {
             if (stripos($summary . ' ' . $description, $word) !== false) {
-                $hasPortuguese = true;
+                $hasRealisticContent = true;
                 break;
             }
         }
 
-        $this->assertTrue($hasPortuguese, 'Generated content should contain Portuguese text');
+        $this->assertTrue($hasRealisticContent, 'Generated content should contain realistic text');
     }
 
     /** @test */
