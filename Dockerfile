@@ -1,34 +1,43 @@
-FROM php:8.5-fpm
+# Production-ready Dockerfile using FrankenPHP
+# FrankenPHP is a modern application server for PHP built on top of Caddy
+# https://frankenphp.dev/
 
-WORKDIR /var/www/html
+FROM dunglas/frankenphp:latest-php8.3
 
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
+# Install system dependencies
+RUN install-php-extensions \
+    pdo_pgsql \
+    pgsql \
+    opcache \
     zip \
-    unzip \
-    libpq-dev \
-    sqlite3 \
-    libsqlite3-dev
+    bcmath \
+    mbstring
 
-RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql pdo_sqlite mbstring exif pcntl bcmath gd
+# Set working directory
+WORKDIR /app
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copy composer files
+COPY composer.json composer.lock ./
 
-COPY . /var/www/html
+# Install Composer dependencies
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-autoloader
 
-RUN composer install --no-dev --optimize-autoloader
+# Copy application code
+COPY . .
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
 
-# WARNING: This command is for LOCAL DEVELOPMENT ONLY
-# php artisan serve is NOT production-ready and should NEVER be used in production
-# For production deployments:
-#   - Use nginx + php-fpm (see nginx.conf)
-#   - Use a process supervisor (e.g., supervisord)
-#   - Configure proper security headers and rate limiting
-# This Dockerfile is designed for local Docker development environments only
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Set permissions
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+
+# Optimize Laravel for production
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
+
+# Expose port (Railway will override with $PORT)
+EXPOSE 8000
+
+# Start FrankenPHP with Laravel worker mode (4 workers for better concurrency)
+CMD ["frankenphp", "php-server", "--workers", "4", "--listen", ":8000"]
