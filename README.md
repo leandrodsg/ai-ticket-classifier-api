@@ -10,7 +10,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.5-blue)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-[Quick Start](#-quick-start) • [Features](#-features) • [API](#-api) • [Deploy](#-deployment)
+[Quick Start](#-quick-start) • [Features](#-features) • [API](#-api)
 
 </div>
 
@@ -31,15 +31,19 @@ Built as a learning project exploring Laravel 12, AI integration patterns (retry
 **Requirements:** Docker + Docker Compose
 
 ```bash
-# Clone & setup
+# Clone the repository
 git clone https://github.com/leandrodsg/ai-ticket-classifier-api.git
 cd ai-ticket-classifier-api
-cp .env.example .env
 
-# Add your OpenRouter API key to .env
-echo "OPENROUTER_API_KEY=sk-or-v1-..." >> .env
+# Run the automated setup script
+chmod +x setup.sh
+./setup.sh
 
-# Start everything
+# Add your OpenRouter API key to .env (required)
+# Get your key at: https://openrouter.ai/
+echo "OPENROUTER_API_KEY=sk-or-v1-your-key-here" >> .env
+
+# Start the application
 docker-compose up -d
 docker-compose exec app php artisan migrate
 
@@ -212,43 +216,6 @@ All targets exceeded in production testing ✓
 
 ![Tech Stack](docs/images/tech-stack.png)
 
----
-
-## Deployment
-
-### Railway (Recommended)
-
-```bash
-# Install CLI
-npm install -g @railway/cli
-
-# Deploy
-railway login
-railway link
-railway up
-```
-
-**Required Environment Variables:**
-
-```env
-APP_ENV=production
-APP_KEY=base64:... # Generate: php artisan key:generate --show
-APP_URL=https://your-app.railway.app
-
-DB_CONNECTION=pgsql
-DB_HOST=your-postgres-host
-DB_DATABASE=railway
-DB_USERNAME=postgres
-DB_PASSWORD=your-secure-password
-
-OPENROUTER_API_KEY=sk-or-v1-...
-OPENROUTER_DEFAULT_MODEL=anthropic/claude-sonnet-4-20250514
-
-CACHE_STORE=database
-QUEUE_CONNECTION=database
-```
-
-Railway handles migrations automatically on deploy.
 
 ---
 
@@ -257,7 +224,7 @@ Railway handles migrations automatically on deploy.
 Contributions welcome! Please:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-thing`)
+2. Create a new feature branch
 3. Write tests (we maintain 100% coverage)
 4. Follow PSR-12 standards
 5. Submit a PR
