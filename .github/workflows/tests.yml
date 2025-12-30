@@ -20,18 +20,21 @@ jobs:
       run: touch database/database.sqlite
 
     - name: Build containers
-      run: docker-compose up -d --build
+      run: docker compose up -d --build
+
+    - name: Install PHP dependencies
+      run: docker compose exec -T app composer install
 
     - name: Generate keys
       run: |
-        docker-compose exec -T app php artisan key:generate
-        docker-compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
+        docker compose exec -T app php artisan key:generate
+        docker compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
 
     - name: Run migrations
-      run: docker-compose exec -T app php artisan migrate
+      run: docker compose exec -T app php artisan migrate
 
     - name: Run tests
-      run: docker-compose exec -T app php artisan test
+      run: docker compose exec -T app php artisan test
 
     - name: Stop containers
-      run: docker-compose down
+      run: docker compose down

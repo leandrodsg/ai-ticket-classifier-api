@@ -66,6 +66,13 @@ if errorlevel 1 (
     exit /b 1
 )
 
+call :print_status "Installing PHP dependencies..."
+docker-compose exec -T app composer install
+if errorlevel 1 (
+    call :print_error "Failed to install PHP dependencies"
+    exit /b 1
+)
+
 REM Generate APP_KEY using Laravel's artisan command
 call :print_status "Generating Laravel APP_KEY"
 docker-compose exec app php artisan key:generate
