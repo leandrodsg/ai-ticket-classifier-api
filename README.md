@@ -51,6 +51,8 @@ docker-compose up -d
 docker-compose exec app php artisan migrate
 ```
 
+**Note:** PHP dependencies are installed automatically by the setup script.
+
 ### Using Make (all platforms)
 ```bash
 git clone https://github.com/leandrodsg/ai-ticket-classifier-api.git
