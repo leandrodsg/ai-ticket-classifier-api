@@ -10,7 +10,7 @@ class OpenRouterClient
     private const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
     private const MAX_RETRIES = 2;
     private const TIMEOUT_SECONDS = 15;
-    private const TEST_TIMEOUT_SECONDS = 20; // 20 segundos em ambiente de teste
+    private const TEST_TIMEOUT_SECONDS = 20; // 20 seconds in test environment
 
     public function __construct(
         private string $apiKey
@@ -18,8 +18,14 @@ class OpenRouterClient
 
     public function callApi(string $model, array $messages): array
     {
-        $maxRetries = app()->environment('testing') ? 0 : self::MAX_RETRIES;
-        
+        // Detect if we are in test environment by checking if PHPUnit is loaded
+        $isTesting = class_exists(\PHPUnit\Framework\TestCase::class) &&
+                    (strpos(get_class($this), 'Tests\\') !== false ||
+                     defined('PHPUNIT_COMPOSER_INSTALL') ||
+                     defined('__PHPUNIT_PHAR__'));
+
+        $maxRetries = $isTesting ? 0 : self::MAX_RETRIES;
+
         $attempts = 0;
         $lastException = null;
 
@@ -51,8 +57,9 @@ class OpenRouterClient
             }
         }
 
+        $totalAttempts = $isTesting ? 1 : ($maxRetries + 1);
         throw new \Exception(
-            "OpenRouter API call failed after " . ($maxRetries + 1) . " attempts: " .
+            "OpenRouter API call failed after {$totalAttempts} attempts: " .
             $lastException->getMessage()
         );
     }
@@ -67,8 +74,13 @@ class OpenRouterClient
             'response_format' => ['type' => 'json_object']
         ];
 
-        // Use timeout maior em ambiente de teste para evitar timeouts prematuros
-        $timeout = app()->environment('testing') ? self::TEST_TIMEOUT_SECONDS : self::TIMEOUT_SECONDS;
+        // Use higher timeout in test environment to avoid premature timeouts
+        // Detect if we are in test environment by checking if PHPUnit is loaded
+        $isTesting = class_exists(\PHPUnit\Framework\TestCase::class) &&
+                    (strpos(get_class($this), 'Tests\\') !== false ||
+                     defined('PHPUNIT_COMPOSER_INSTALL') ||
+                     defined('__PHPUNIT_PHAR__'));
+        $timeout = $isTesting ? self::TEST_TIMEOUT_SECONDS : self::TIMEOUT_SECONDS;
 
         $httpClient = Http::timeout($timeout)
             ->withHeaders([
@@ -78,7 +90,7 @@ class OpenRouterClient
                 'X-Title' => 'AI Ticket Classifier'
             ]);
 
-        if (app()->environment('testing')) {
+        if ($isTesting) {
             $httpClient = $httpClient->withoutVerifying();
         }
 
