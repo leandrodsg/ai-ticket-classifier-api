@@ -30,18 +30,11 @@ APP_KEY=base64:your-key-here
 APP_ENV=local
 APP_DEBUG=true
 
-DB_CONNECTION=pgsql
-DB_HOST=db
-DB_PORT=5432
-DB_DATABASE=ticket_classifier
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
+# Database: SQLite (default for local development)
+DB_CONNECTION=sqlite
 
-CACHE_DRIVER=redis
-REDIS_HOST=redis
-
+# AI Configuration
 OPENROUTER_API_KEY=your-api-key
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
 ### 3. Start Docker Services
@@ -50,10 +43,9 @@ OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 docker-compose up -d
 ```
 
-This starts three containers:
-- PHP-FPM application server
-- PostgreSQL database
-- Redis cache
+This starts the containers:
+- PHP application server (with SQLite database)
+- PostgreSQL database (optional, for testing production-like setup)
 
 ### 4. Install Dependencies
 
@@ -114,16 +106,18 @@ docker-compose exec app php artisan test tests/Feature/TicketUploadControllerTes
 
 ### Database Connection Failed
 
-Check if PostgreSQL container is running:
+Ensure the SQLite database file exists and has correct permissions:
 
 ```bash
-docker-compose ps
+ls -la database/database.sqlite
 ```
 
-Restart database if needed:
+Recreate database file if needed:
 
 ```bash
-docker-compose restart db
+rm database/database.sqlite
+touch database/database.sqlite
+docker-compose exec app php artisan migrate
 ```
 
 ### Memory Limit Exceeded in Tests

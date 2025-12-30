@@ -28,35 +28,66 @@ Built as a learning project exploring Laravel 12, AI integration patterns (retry
 
 ## ⚡ Quick Start
 
-**Requirements:** Docker + Docker Compose
+**Requirements:** Docker, Docker Compose, Git
 
-```bash
-# Clone the repository
+### Windows
+```cmd
 git clone https://github.com/leandrodsg/ai-ticket-classifier-api.git
 cd ai-ticket-classifier-api
-
-# Run the automated setup script
-chmod +x setup.sh
-./setup.sh
-
-# Add your OpenRouter API key to .env (required)
-# Get your key at: https://openrouter.ai/
-echo "OPENROUTER_API_KEY=sk-or-v1-your-key-here" >> .env
-
-# Start the application
+setup.bat
+# Edit .env and add your OPENROUTER_API_KEY (get it at https://openrouter.ai/)
 docker-compose up -d
 docker-compose exec app php artisan migrate
-
-# API running at http://localhost:8000
 ```
+
+### macOS / Linux
+```bash
+git clone https://github.com/leandrodsg/ai-ticket-classifier-api.git
+cd ai-ticket-classifier-api
+chmod +x setup.sh
+./setup.sh
+# Edit .env and add your OPENROUTER_API_KEY (get it at https://openrouter.ai/)
+docker-compose up -d
+docker-compose exec app php artisan migrate
+```
+
+### Using Make (all platforms)
+```bash
+git clone https://github.com/leandrodsg/ai-ticket-classifier-api.git
+cd ai-ticket-classifier-api
+make setup
+# Edit .env and add your OPENROUTER_API_KEY (get it at https://openrouter.ai/)
+make start
+make migrate
+```
+
+**Database:** Uses SQLite by default (no additional setup needed). PostgreSQL is available optionally.
 
 **Test it:**
-
 ```bash
-curl -X POST http://localhost:8000/api/csv/generate \
-  -H "Content-Type: application/json" \
-  -d '{"ticket_count": 5}' | jq
+curl http://localhost:8000/api/health
 ```
+
+---
+
+## Common Issues
+
+**Port already in use:**
+```bash
+docker-compose down
+# Change ports in docker-compose.yml if needed
+```
+
+**Docker not running:**
+Start Docker Desktop and try again.
+
+**Permission denied (Linux only):**
+```bash
+sudo usermod -aG docker $USER
+# Logout and login again
+```
+
+**Need help?** [Open an issue](https://github.com/leandrodsg/ai-ticket-classifier-api/issues)
 
 ---
 
@@ -78,7 +109,7 @@ curl -X POST http://localhost:8000/api/csv/generate \
 4. **AI Classification** → 3-model fallback (Claude → GPT-4 → Gemini)
 5. **ITIL Calculation** → Impact × Urgency → Priority
 6. **SLA Calculation** → Auto deadline based on priority
-7. **Storage** → PostgreSQL + Cache (30min TTL)
+7. **Storage** → SQLite/PostgreSQL + Cache (30min TTL)
 
 ---
 

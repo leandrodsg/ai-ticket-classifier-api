@@ -6,6 +6,40 @@
 
 set -e  # Exit on any error
 
+# Parse command line arguments
+SKIP_CHECKS=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help|-h)
+            echo "AI Ticket Classifier API - Setup Script"
+            echo ""
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --help, -h          Show this help message"
+            echo "  --skip-checks       Skip port availability checks (useful for CI/CD)"
+            echo ""
+            echo "This script will:"
+            echo "  - Check if required ports (8000, 5432) are available"
+            echo "  - Copy .env.example to .env"
+            echo "  - Create SQLite database file"
+            echo "  - Generate APP_KEY and CSV_SIGNING_KEY"
+            echo "  - Provide instructions for adding OPENROUTER_API_KEY"
+            exit 0
+            ;;
+        --skip-checks)
+            SKIP_CHECKS=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 # Color codes for better UX
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -35,15 +69,46 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Function to check if port is available
+check_port() {
+    local port=$1
+    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+        return 1  # Port is in use
+    else
+        return 0  # Port is available
+    fi
+}
+
 # Check if Docker and Docker Compose are available
 if ! command_exists docker; then
     print_error "Docker is not installed. Please install Docker first."
+    print_info "Visit: https://docs.docker.com/get-docker/"
     exit 1
 fi
 
 if ! command_exists docker-compose; then
     print_error "Docker Compose is not installed. Please install Docker Compose first."
+    print_info "Visit: https://docs.docker.com/compose/install/"
     exit 1
+fi
+
+# Check port availability (skip in CI/CD)
+if [ "$SKIP_CHECKS" = false ]; then
+    print_info "Checking port availability..."
+
+    if ! check_port 8000; then
+        print_error "Port 8000 is already in use. Please stop the service using it or change the port in docker-compose.yml"
+        print_info "To find what's using port 8000: lsof -i :8000"
+        exit 1
+    fi
+
+    if ! check_port 5432; then
+        print_error "Port 5432 is already in use. Please stop the service using it or change the port in docker-compose.yml"
+        print_info "To find what's using port 5432: lsof -i :5432"
+        exit 1
+    fi
+
+    print_status "Ports 8000 and 5432 are available"
 fi
 
 print_info "Starting AI Ticket Classifier API local setup..."
