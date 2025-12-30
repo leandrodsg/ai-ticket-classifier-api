@@ -150,6 +150,12 @@ else
     sed -i "s/^CSV_SIGNING_KEY=.*/CSV_SIGNING_KEY=$CSV_KEY/" .env
 fi
 
+print_status "Installing PHP dependencies..."
+docker-compose exec -T app composer install || {
+    print_error "Failed to install PHP dependencies"
+    exit 1
+}
+
 print_status "Setup completed successfully!"
 echo
 print_info "IMPORTANT: You need to add your OpenRouter API key manually:"
