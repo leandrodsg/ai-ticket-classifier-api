@@ -1,55 +1,37 @@
-name: Laravel Tests
+name: Tests
 
 on:
   push:
-    branches: [ main, develop, feature/* ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        php-version: ['8.5']
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-version }}
-        extensions: mbstring, pdo, pdo_sqlite, sqlite3
-        coverage: xdebug
+    - uses: actions/checkout@v3
 
     - name: Copy .env
-      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      run: cp .env.example .env
 
-    - name: Install Dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction
-
-    - name: Generate application key
-      run: php artisan key:generate
-
-    - name: Generate CSV signing key
-      run: php artisan key:generate --show | sed 's/base64://' | xargs -I {} echo "CSV_SIGNING_KEY=base64:{}" >> .env
-
-    - name: Create Database
+    - name: Create SQLite database
       run: touch database/database.sqlite
 
-    - name: Run Migrations
-      run: php artisan migrate --force
+    - name: Build containers
+      run: docker-compose up -d --build
 
-    - name: Execute tests (Unit and Feature tests) via PHPUnit
-      run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+    - name: Generate keys
+      run: |
+        docker-compose exec -T app php artisan key:generate
+        docker-compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    - name: Run migrations
+      run: docker-compose exec -T app php artisan migrate
+
+    - name: Run tests
+      run: docker-compose exec -T app php artisan test
+
+    - name: Stop containers
+      run: docker-compose down
