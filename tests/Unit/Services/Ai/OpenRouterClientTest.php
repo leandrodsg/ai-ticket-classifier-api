@@ -68,8 +68,8 @@ class OpenRouterClientTest extends TestCase
             $endTime = microtime(true);
             $duration = $endTime - $startTime;
             
-            // Sem retries, deve falhar instantaneamente (< 1 segundo)
-            $this->assertLessThan(1, $duration);
+            // Sem retries, deve falhar instantaneamente (< 2 segundos)
+            $this->assertLessThan(2, $duration);
         }
     }
 

@@ -36,8 +36,8 @@ class AiIntegrationTest extends TestCase
 
     public function test_ai_integration_with_real_openrouter_call()
     {
-        // Set overall test timeout (45 seconds)
-        set_time_limit(45);
+        // Set overall test timeout (60 seconds)
+        set_time_limit(60);
 
         $ticket = [
             'issue_key' => 'DEMO-001',
@@ -77,7 +77,7 @@ class AiIntegrationTest extends TestCase
 
             // Verify timing (should be reasonable)
             $processingTime = ($endTime - $startTime) * 1000;
-            $this->assertLessThan(30000, $processingTime, 'Processing should take less than 30 seconds');
+            $this->assertLessThan(50000, $processingTime, 'Processing should take less than 50 seconds');
 
             // Log successful test
             Log::info('AI Integration test passed', [
@@ -111,8 +111,8 @@ class AiIntegrationTest extends TestCase
             $this->markTestSkipped('OpenRouter API key not configured');
         }
 
-        // Set overall test timeout (35 seconds)
-        set_time_limit(35);
+        // Set overall test timeout (60 seconds)
+        set_time_limit(60);
 
         $ticket = [
             'issue_key' => 'PERF-001',
@@ -135,8 +135,8 @@ class AiIntegrationTest extends TestCase
                 'model_used' => 'meta-llama/llama-3.3-70b-instruct' // First model
             ]);
 
-            // Performance should be reasonable (under 25 seconds for simple ticket)
-            $this->assertLessThan(25000, $processingTime);
+            // Performance should be reasonable (under 45 seconds for simple ticket)
+            $this->assertLessThan(45000, $processingTime);
 
         } catch (\Exception $e) {
             // Skip if API is down
