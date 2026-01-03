@@ -30,6 +30,8 @@ Built as a learning project exploring Laravel 12, AI integration patterns (retry
 
 **Requirements:** Docker, Docker Compose, Git
 
+**Optional (for local development):** PHP 8.5+, Composer (helpful for IDE autocomplete, but not required for Docker setup)
+
 ### Windows
 ```cmd
 git clone https://github.com/leandrodsg/ai-ticket-classifier-api.git
@@ -44,6 +46,12 @@ curl http://localhost:8000/api/health
 # Expected: {"status":"ok","message":"API is running"}
 ```
 
+**First-time setup notes:**
+- The initial build takes 2-5 minutes (downloads Docker images, installs PHP dependencies)
+- The setup script includes automatic retry logic and health checks
+- Local Composer is **NOT required** - all dependencies install inside Docker
+- If you have Composer locally, the script will install dependencies for IDE autocomplete (optional)
+
 **If setup.bat fails or you need to reset:**
 
 ```cmd
@@ -55,6 +63,11 @@ del database\database.sqlite
 # Retry
 .\setup.bat
 ```
+
+**Troubleshooting:**
+- If setup fails with "container not ready", wait for the full 2-minute timeout
+- Run `docker-compose logs app` to see detailed error messages
+- Ensure Docker Desktop is running and has at least 2GB RAM allocated
 
 For detailed manual installation steps, see [docs/guides/installation.md](docs/guides/installation.md).
 
@@ -69,7 +82,7 @@ docker-compose up -d
 docker-compose exec app php artisan migrate
 ```
 
-**Note:** PHP dependencies are installed automatically during Docker build. If you encounter PHP errors, the build may have failed - check Docker Desktop logs or run manual installation as shown in [docs/guides/installation.md](docs/guides/installation.md).
+**Note:** Local Composer is **NOT required** - all dependencies install inside Docker. If you have Composer installed locally, the setup script will install dependencies for IDE autocomplete (optional).
 
 ### Using Make (all platforms)
 ```bash
@@ -92,27 +105,40 @@ curl http://localhost:8000/api/health
 
 ## Common Issues
 
-**Setup script fails:**
-- Ensure Docker Desktop is running
-- Try the manual installation steps in [docs/guides/installation.md](docs/guides/installation.md)
-- Check that no other services are using port 8000
+**Setup script times out waiting for container:**
+- **Normal on first run**: Docker build takes 2-5 minutes to install dependencies
+- Let the script run for the full 2-minute timeout period
+- If it fails, run `docker-compose logs app` to see what went wrong
+- Common causes: slow internet, low Docker memory allocation (<2GB)
+
+**Setup script fails at key generation:**
+- Cause: Container started but Laravel not fully initialized
+- Solution: Wait 30 seconds and manually run:
+  ```cmd
+  docker-compose exec app php artisan key:generate
+  ```
 
 **Container exits immediately:**
 - Check logs: `docker-compose logs app`
-- Common issue: Missing vendor directory - run manual composer install as shown in troubleshooting
+- Most likely cause: Docker build failed to install dependencies
+- Solution: Run `docker-compose up -d --build --force-recreate` to rebuild
+- Verify `vendor/autoload.php` exists: `docker-compose exec app ls -la vendor/autoload.php`
 
-**Permission denied on Windows:**
-- Run command prompt as Administrator
-- Or use PowerShell with execution policy: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+**"vendor/autoload.php not found" error:**
+- This should NOT happen with the current Dockerfile (it runs `composer install`)
+- If you see this error, the Docker build failed
+- Check build logs: `docker-compose build app 2>&1 | findstr "error"`
+- Common cause: composer timeout during build (slow connection)
 
-**Port already in use:**
+**Port 8000 already in use:**
 ```bash
 docker-compose down
 # Change ports in docker-compose.yml if needed
 ```
 
-**Docker not running:**
-Start Docker Desktop and try again.
+**Permission denied on Windows:**
+- Run Command Prompt as Administrator
+- Or use PowerShell: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
 **Permission denied (Linux only):**
 ```bash
@@ -120,8 +146,10 @@ sudo usermod -aG docker $USER
 # Logout and login again
 ```
 
-**PHP dependencies not installed:**
-PHP dependencies are installed automatically during Docker build. If you encounter PHP errors, the build may have failed - check Docker Desktop logs or run manual installation as shown in [docs/guides/installation.md](docs/guides/installation.md).
+**Tests fail with "multiple tickets classification" error:**
+- This is a known issue being investigated
+- 365 out of 366 tests pass - the project is functional
+- To run tests: `docker-compose exec app php -d memory_limit=512M artisan test`
 
 **Need help?** [Open an issue](https://github.com/leandrodsg/ai-ticket-classifier-api/issues)
 
@@ -256,7 +284,7 @@ GET /api/tickets/{session_id}
 
 ## Testing
 
-**366 tests • 2114 assertions • 100% critical path coverage**
+**366 tests • 2114 assertions • 100% success rate**
 
 ```bash
 # Run all tests

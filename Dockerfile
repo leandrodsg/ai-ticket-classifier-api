@@ -20,6 +20,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . /var/www/html
 
+# Install PHP dependencies
+RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # WARNING: This command is for LOCAL DEVELOPMENT ONLY
