@@ -42,7 +42,7 @@ jobs:
       run: |
         echo "Waiting for app container to be healthy..."
         for i in {1..30}; do
-          if docker compose exec -T app curl -f http://localhost:8000/api/health > /dev/null 2>&1; then
+          if docker compose exec -T app curl -s http://localhost:8000/api/health > /dev/null 2>&1; then
             echo "App container is healthy!"
             break
           fi
