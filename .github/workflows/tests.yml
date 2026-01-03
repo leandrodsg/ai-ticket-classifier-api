@@ -13,6 +13,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.5'
+
+    - name: Install PHP dependencies
+      run: composer install --no-dev --optimize-autoloader
+
     - name: Copy .env
       run: cp .env.example .env
 
@@ -38,9 +46,6 @@ jobs:
             exit 1
           fi
         done
-
-    - name: Install PHP dependencies
-      run: docker compose exec -T app composer install
 
     - name: Generate keys
       run: |
