@@ -1,0 +1,58 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticket-classifier-api
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+      - CACHE_DRIVER=database
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ticket-classifier-network
+
+  # PostgreSQL database (optional - only needed if switching from SQLite to PostgreSQL)
+  # To use PostgreSQL: change DB_CONNECTION=pgsql in .env and uncomment depends_on in app service
+  db:
+    image: postgres:16-alpine
+    container_name: ticket-classifier-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ticket_classifier
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - ticket-classifier-network
+    profiles:
+      - postgres  # Only starts when explicitly requested with --profile postgres
+
+networks:
+  ticket-classifier-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

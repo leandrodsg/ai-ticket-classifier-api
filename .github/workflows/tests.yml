@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Copy .env
+      run: cp .env.example .env
+
+    - name: Create SQLite database
+      run: touch database/database.sqlite
+
+    - name: Build containers
+      run: docker compose up -d --build
+
+    - name: Install PHP dependencies
+      run: docker compose exec -T app composer install
+
+    - name: Generate keys
+      run: |
+        docker compose exec -T app php artisan key:generate
+        docker compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
+
+    - name: Run migrations
+      run: docker compose exec -T app php artisan migrate
+
+    - name: Run tests
+      run: docker compose exec -T app php artisan test
+
+    - name: Stop containers
+      run: docker compose down

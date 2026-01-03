@@ -1,0 +1,490 @@
+openapi: 3.1.0
+info:
+  title: AI Ticket Classifier API
+  version: 1.0.0
+  description: REST API for automatic ticket classification using AI models. Accepts CSV files with JIRA-format tickets and returns classifications including category, priority, sentiment, and SLA calculations.
+  contact:
+    name: API Support
+    url: https://github.com/leandrodsg/ai-ticket-classifier-api
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development
+  - url: https://production-url.railway.app/api
+    description: Production
+
+tags:
+  - name: CSV Generation
+    description: Generate test CSV files
+  - name: Ticket Classification
+    description: Upload and classify tickets
+  - name: Job Query
+    description: Query classification job status
+  - name: System
+    description: System information
+
+paths:
+  /csv/generate:
+    post:
+      tags:
+        - CSV Generation
+      summary: Generate test CSV file
+      description: Creates a CSV file with specified number of test tickets. Returns base64-encoded content with metadata headers for signature validation.
+      operationId: generateCsv
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ticket_count
+              properties:
+                ticket_count:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  description: Number of tickets to generate
+                  example: 5
+      responses:
+        '200':
+          description: CSV generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      csv_content:
+                        type: string
+                        format: byte
+                        description: Base64-encoded CSV content with metadata
+                      session_id:
+                        type: string
+                        format: uuid
+                        example: "9d3e4f5a-1234-5678-9abc-def012345678"
+                      file_name:
+                        type: string
+                        example: "tickets_20251229_103045.csv"
+                      row_count:
+                        type: integer
+                        example: 5
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /tickets/upload:
+    post:
+      tags:
+        - Ticket Classification
+      summary: Upload CSV for classification
+      description: Accepts base64-encoded CSV file with ticket data. Validates HMAC signature, checks nonce uniqueness, and queues tickets for AI classification.
+      operationId: uploadTickets
+      parameters:
+        - name: X-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+          description: HMAC-SHA256 signature of request payload
+          example: "a1b2c3d4e5f6..."
+        - name: X-Nonce
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Unique 32-character nonce from CSV metadata
+          example: "abcdef1234567890abcdef1234567890"
+        - name: X-Timestamp
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: ISO8601 timestamp from CSV metadata
+          example: "2025-12-29T10:30:45+00:00"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - csv_content
+              properties:
+                csv_content:
+                  type: string
+                  format: byte
+                  description: Base64-encoded CSV content with metadata headers
+                file_name:
+                  type: string
+                  description: Original filename
+                  example: "support_tickets.csv"
+      responses:
+        '200':
+          description: Tickets uploaded and classification started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      session_id:
+                        type: string
+                        format: uuid
+                        example: "9d3e4f5a-1234-5678-9abc-def012345678"
+                      status:
+                        type: string
+                        enum: [pending, processing]
+                        example: "pending"
+                      total_tickets:
+                        type: integer
+                        example: 5
+                      message:
+                        type: string
+                        example: "Classification job created"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    enum: [invalid_base64, invalid_signature, expired_timestamp, nonce_reused]
+                    example: "invalid_signature"
+                  message:
+                    type: string
+                    example: "HMAC signature validation failed"
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "file_too_large"
+                  message:
+                    type: string
+                    example: "CSV file exceeds 5MB limit"
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /tickets/{id}:
+    get:
+      tags:
+        - Job Query
+      summary: Query classification job status
+      description: Returns job status and results by session ID. Response structure varies based on job state (pending, processing, completed, failed).
+      operationId: queryJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Session ID from upload response
+          example: "9d3e4f5a-1234-5678-9abc-def012345678"
+      responses:
+        '200':
+          description: Job found
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/JobPending'
+                  - $ref: '#/components/schemas/JobProcessing'
+                  - $ref: '#/components/schemas/JobCompleted'
+                  - $ref: '#/components/schemas/JobFailed'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "not_found"
+                  message:
+                    type: string
+                    example: "Classification job not found"
+
+  /info:
+    get:
+      tags:
+        - System
+      summary: API information
+      description: Returns basic API metadata and version information.
+      operationId: getInfo
+      responses:
+        '200':
+          description: API info retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                    example: "AI Ticket Classifier API"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  environment:
+                    type: string
+                    example: "production"
+
+components:
+  schemas:
+    JobPending:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            session_id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [pending]
+            created_at:
+              type: string
+              format: date-time
+            file_name:
+              type: string
+
+    JobProcessing:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            session_id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [processing]
+            created_at:
+              type: string
+              format: date-time
+            file_name:
+              type: string
+
+    JobCompleted:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            session_id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [completed]
+            created_at:
+              type: string
+              format: date-time
+            completed_at:
+              type: string
+              format: date-time
+            file_name:
+              type: string
+            results:
+              type: object
+              properties:
+                total_tickets:
+                  type: integer
+                processing_time_ms:
+                  type: integer
+            tickets:
+              type: array
+              items:
+                $ref: '#/components/schemas/ClassifiedTicket'
+
+    JobFailed:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            session_id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [failed]
+            created_at:
+              type: string
+              format: date-time
+            failed_at:
+              type: string
+              format: date-time
+            file_name:
+              type: string
+            error_message:
+              type: string
+
+    ClassifiedTicket:
+      type: object
+      properties:
+        issue_key:
+          type: string
+          example: "TICKET-001"
+        summary:
+          type: string
+          example: "Cannot access email"
+        category:
+          type: string
+          enum: [technical, commercial, billing, support, general]
+          example: "technical"
+        priority:
+          type: string
+          enum: [critical, high, medium, low]
+          example: "high"
+        urgency:
+          type: string
+          enum: [high, medium, low]
+          example: "high"
+        impact:
+          type: string
+          enum: [high, medium, low]
+          example: "medium"
+        sentiment:
+          type: string
+          enum: [positive, neutral, negative]
+          example: "negative"
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.95
+        sla_due_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-12-29T14:30:00+00:00"
+
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "validation_error"
+              message:
+                type: string
+                example: "Validation failed"
+              details:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "rate_limit_exceeded"
+              message:
+                type: string
+                example: "Too many requests"
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Total requests allowed per window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Requests remaining in current window
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until rate limit resets
+
+    ServiceUnavailable:
+      description: Service temporarily unavailable
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "service_unavailable"
+              message:
+                type: string
+                example: "AI service is currently unavailable"
+
+  securitySchemes:
+    HmacSignature:
+      type: apiKey
+      in: header
+      name: X-Signature
+      description: HMAC-SHA256 signature for request authentication
+
+security: []
