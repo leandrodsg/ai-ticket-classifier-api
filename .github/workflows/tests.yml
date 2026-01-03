@@ -30,6 +30,14 @@ jobs:
     - name: Build containers
       run: docker compose up -d --build
 
+    - name: Generate keys
+      run: |
+        docker compose exec -T app php artisan key:generate
+        docker compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
+
+    - name: Run migrations
+      run: docker compose exec -T app php artisan migrate
+
     - name: Wait for app container to be healthy
       run: |
         echo "Waiting for app container to be healthy..."
@@ -46,14 +54,6 @@ jobs:
             exit 1
           fi
         done
-
-    - name: Generate keys
-      run: |
-        docker compose exec -T app php artisan key:generate
-        docker compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
-
-    - name: Run migrations
-      run: docker compose exec -T app php artisan migrate
 
     - name: Run tests
       run: docker compose exec -T app php artisan test
