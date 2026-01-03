@@ -19,7 +19,7 @@ jobs:
         php-version: '8.5'
 
     - name: Install PHP dependencies
-      run: composer install --no-dev --optimize-autoloader
+      run: composer install --prefer-dist --no-progress
 
     - name: Copy .env
       run: cp .env.example .env
