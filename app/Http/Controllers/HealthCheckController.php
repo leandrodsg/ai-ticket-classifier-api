@@ -109,7 +109,7 @@ class HealthCheckController extends Controller
         try {
             $apiKey = config('services.openrouter.api_key') ?: env('OPENROUTER_API_KEY');
 
-            if (!$apiKey) {
+            if (!$apiKey || $apiKey === 'your_openrouter_api_key_here') {
                 return [
                     'status' => 'degraded',
                     'message' => 'OpenRouter API key not configured',
