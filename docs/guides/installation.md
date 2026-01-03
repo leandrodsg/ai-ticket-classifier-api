@@ -68,16 +68,15 @@ docker-compose exec app php artisan migrate
 ### 7. Verify Installation
 
 ```bash
-curl http://localhost:8000/api/info
+curl http://localhost:8000/api/health
 ```
 
 Expected response:
 
 ```json
 {
-  "service": "AI Ticket Classifier API",
-  "version": "1.0.0",
-  "environment": "local"
+  "status": "ok",
+  "message": "API is running"
 }
 ```
 
@@ -136,6 +135,55 @@ If port 8000 is occupied, change it in `docker-compose.yml`:
 ports:
   - "8001:8000"
 ```
+
+### Setup Script Issues (Windows)
+
+If `setup.bat` fails with "broken pipe" errors:
+
+1. Ensure Docker Desktop is fully started
+2. Wait for containers to be completely ready (may take 10-15 seconds)
+3. If it still fails, use manual installation steps above
+
+For partial setup failures:
+
+```cmd
+# Clean up and retry
+docker-compose down
+del .env
+del database\database.sqlite
+.\setup.bat
+```
+
+### Container Exits Immediately
+
+Check container logs for issues:
+
+```bash
+docker-compose logs app
+```
+
+Common causes:
+- Missing vendor directory: Run `docker-compose exec app composer install`
+- Database file permissions: Recreate `database/database.sqlite`
+- Environment variables: Check `.env` file is properly configured
+
+### Permission Issues on Windows
+
+If you get permission errors:
+
+1. Run Command Prompt as Administrator
+2. Or configure PowerShell execution policy:
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+
+### PHP Dependencies Not Available
+
+PHP dependencies are installed during Docker build. If you encounter class not found errors:
+
+1. Check Docker build completed successfully
+2. Verify vendor directory exists: `docker-compose exec app ls -la vendor/`
+3. Reinstall if needed: `docker-compose exec app composer install`
 
 ## Development Commands
 
