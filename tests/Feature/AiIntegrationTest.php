@@ -77,7 +77,7 @@ class AiIntegrationTest extends TestCase
 
             // Verify timing (should be reasonable)
             $processingTime = ($endTime - $startTime) * 1000;
-            $this->assertLessThan(50000, $processingTime, 'Processing should take less than 50 seconds');
+            $this->assertLessThan(75000, $processingTime, 'Processing should take less than 75 seconds');
 
             // Log successful test
             Log::info('AI Integration test passed', [

@@ -27,13 +27,13 @@ jobs:
     - name: Create SQLite database
       run: touch database/database.sqlite
 
-    - name: Build containers
-      run: docker compose up -d --build
-
     - name: Generate keys
       run: |
-        docker compose exec -T app php artisan key:generate
-        docker compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
+        php artisan key:generate
+        php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
+
+    - name: Build containers
+      run: docker compose up -d --build
 
     - name: Run migrations
       run: docker compose exec -T app php artisan migrate
