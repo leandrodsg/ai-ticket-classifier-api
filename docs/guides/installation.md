@@ -5,6 +5,9 @@
 - Docker and Docker Compose
 - Git
 - OpenRouter API key (for AI classification)
+- **Optional:** PHP 8.5+ and Composer (for local development and IDE support)
+
+**Note:** PHP dependencies are automatically installed during Docker build. Local PHP and Composer are only needed if you want to run commands outside Docker or get IDE autocomplete support.
 
 ## Local Development Setup
 
@@ -40,32 +43,27 @@ OPENROUTER_API_KEY=your-api-key
 ### 3. Start Docker Services
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-This starts the containers:
+This starts the containers and installs PHP dependencies automatically:
 - PHP application server (with SQLite database)
 - PostgreSQL database (optional, for testing production-like setup)
+- All PHP dependencies are installed during the Docker build process
 
-### 4. Install Dependencies
-
-```bash
-docker-compose exec app composer install
-```
-
-### 5. Generate Application Key
+### 4. Generate Application Key
 
 ```bash
 docker-compose exec app php artisan key:generate
 ```
 
-### 6. Run Migrations
+### 5. Run Migrations
 
 ```bash
 docker-compose exec app php artisan migrate
 ```
 
-### 7. Verify Installation
+### 6. Verify Installation
 
 ```bash
 curl http://localhost:8000/api/health
@@ -163,9 +161,11 @@ docker-compose logs app
 ```
 
 Common causes:
-- Missing vendor directory: Run `docker-compose exec app composer install`
+- Docker build failed: Rebuild with `docker-compose up -d --build --force-recreate`
 - Database file permissions: Recreate `database/database.sqlite`
 - Environment variables: Check `.env` file is properly configured
+
+If dependencies are missing (rare), they should be installed during build. Check Docker build logs for errors.
 
 ### Permission Issues on Windows
 
@@ -176,14 +176,6 @@ If you get permission errors:
    ```powershell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
    ```
-
-### PHP Dependencies Not Available
-
-PHP dependencies are installed during Docker build. If you encounter class not found errors:
-
-1. Check Docker build completed successfully
-2. Verify vendor directory exists: `docker-compose exec app ls -la vendor/`
-3. Reinstall if needed: `docker-compose exec app composer install`
 
 ## Development Commands
 

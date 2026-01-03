@@ -36,6 +36,24 @@ if not exist "database\database.sqlite" (
     echo SQLite database file already exists
 )
 
+REM Check if Composer is installed locally
+where composer >nul 2>&1
+if errorlevel 1 (
+    echo WARNING: Composer not found locally.
+    echo Skipping local dependency installation - dependencies will be installed in Docker.
+    echo If you need to run PHP commands locally, install Composer from: https://getcomposer.org/
+) else (
+    REM Install PHP dependencies locally (helps with IDE autocomplete and local development)
+    echo Installing PHP dependencies locally...
+    composer install --no-interaction
+    if errorlevel 1 (
+        echo WARNING: Failed to install dependencies locally, but continuing...
+        echo Dependencies will be installed in Docker during build.
+    ) else (
+        echo PHP dependencies installed successfully
+    )
+)
+
 REM Build and start containers
 echo Building and starting Docker containers...
 docker-compose up -d --build
@@ -56,8 +74,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Install PHP dependencies (already done in Docker build with dev packages)
-echo PHP dependencies already installed in Docker image
+REM Install PHP dependencies (installed during Docker build)
+echo PHP dependencies installed during Docker build
 
 REM Generate APP_KEY using Laravel's artisan command
 echo Generating Laravel APP_KEY
