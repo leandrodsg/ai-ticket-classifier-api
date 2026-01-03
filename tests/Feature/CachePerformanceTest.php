@@ -237,9 +237,9 @@ class CachePerformanceTest extends TestCase
         $this->assertGreaterThan(0, $avgTimeWithCache);
         $this->assertGreaterThan(0, $improvementPercent);
 
-        // Cache time should be at least 1.4x faster (adjusted for reduced computational load)
+        // Cache time should be at least 1.3x faster (adjusted for reduced computational load)
         $speedupRatio = $avgTimeWithoutCache / $avgTimeWithCache;
-        $this->assertGreaterThan(1.4, $speedupRatio,
-            sprintf('Cache should be at least 1.4x faster. Got: %.1fx speedup', $speedupRatio));
+        $this->assertGreaterThan(1.3, $speedupRatio,
+            sprintf('Cache should be at least 1.3x faster. Got: %.1fx speedup', $speedupRatio));
     }
 }

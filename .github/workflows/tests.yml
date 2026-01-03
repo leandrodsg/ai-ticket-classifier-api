@@ -22,6 +22,23 @@ jobs:
     - name: Build containers
       run: docker compose up -d --build
 
+    - name: Wait for app container to be healthy
+      run: |
+        echo "Waiting for app container to be healthy..."
+        for i in {1..30}; do
+          if docker compose exec -T app curl -f http://localhost:8000/api/health > /dev/null 2>&1; then
+            echo "App container is healthy!"
+            break
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 10
+          if [ $i -eq 30 ]; then
+            echo "App container failed to become healthy"
+            docker compose logs app
+            exit 1
+          fi
+        done
+
     - name: Install PHP dependencies
       run: docker compose exec -T app composer install
 
