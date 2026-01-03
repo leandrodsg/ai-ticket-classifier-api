@@ -13,25 +13,47 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.5'
+
+    - name: Install PHP dependencies
+      run: composer install --prefer-dist --no-progress
+
     - name: Copy .env
       run: cp .env.example .env
 
     - name: Create SQLite database
       run: touch database/database.sqlite
 
+    - name: Generate keys
+      run: |
+        php artisan key:generate
+        php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
+
     - name: Build containers
       run: docker compose up -d --build
 
-    - name: Install PHP dependencies
-      run: docker compose exec -T app composer install
-
-    - name: Generate keys
-      run: |
-        docker compose exec -T app php artisan key:generate
-        docker compose exec -T app php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
-
     - name: Run migrations
       run: docker compose exec -T app php artisan migrate
+
+    - name: Wait for app container to be healthy
+      run: |
+        echo "Waiting for app container to be healthy..."
+        for i in {1..30}; do
+          if docker compose exec -T app curl -s http://localhost:8000/api/health > /dev/null 2>&1; then
+            echo "App container is healthy!"
+            break
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 10
+          if [ $i -eq 30 ]; then
+            echo "App container failed to become healthy"
+            docker compose logs app
+            exit 1
+          fi
+        done
 
     - name: Run tests
       run: docker compose exec -T app php artisan test

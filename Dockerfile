@@ -20,8 +20,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . /var/www/html
 
-RUN composer install --no-dev --optimize-autoloader
-
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # WARNING: This command is for LOCAL DEVELOPMENT ONLY
