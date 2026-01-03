@@ -34,11 +34,29 @@ Built as a learning project exploring Laravel 12, AI integration patterns (retry
 ```cmd
 git clone https://github.com/leandrodsg/ai-ticket-classifier-api.git
 cd ai-ticket-classifier-api
-setup.bat
+.\setup.bat
 # Edit .env and add your OPENROUTER_API_KEY (get it at https://openrouter.ai/)
 docker-compose up -d
 docker-compose exec app php artisan migrate
+
+# Verify setup
+curl http://localhost:8000/api/health
+# Expected: {"status":"ok","message":"API is running"}
 ```
+
+**If setup.bat fails or you need to reset:**
+
+```cmd
+# Clean up
+docker-compose down
+del .env
+del database\database.sqlite
+
+# Retry
+.\setup.bat
+```
+
+For detailed manual installation steps, see [docs/guides/installation.md](docs/guides/installation.md).
 
 ### macOS / Linux
 ```bash
@@ -51,7 +69,7 @@ docker-compose up -d
 docker-compose exec app php artisan migrate
 ```
 
-**Note:** PHP dependencies are installed automatically by the setup script.
+**Note:** PHP dependencies are installed automatically during Docker build. If you encounter PHP errors, the build may have failed - check Docker Desktop logs or run manual installation as shown in [docs/guides/installation.md](docs/guides/installation.md).
 
 ### Using Make (all platforms)
 ```bash
@@ -74,6 +92,19 @@ curl http://localhost:8000/api/health
 
 ## Common Issues
 
+**Setup script fails:**
+- Ensure Docker Desktop is running
+- Try the manual installation steps in [docs/guides/installation.md](docs/guides/installation.md)
+- Check that no other services are using port 8000
+
+**Container exits immediately:**
+- Check logs: `docker-compose logs app`
+- Common issue: Missing vendor directory - run manual composer install as shown in troubleshooting
+
+**Permission denied on Windows:**
+- Run command prompt as Administrator
+- Or use PowerShell with execution policy: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+
 **Port already in use:**
 ```bash
 docker-compose down
@@ -88,6 +119,9 @@ Start Docker Desktop and try again.
 sudo usermod -aG docker $USER
 # Logout and login again
 ```
+
+**PHP dependencies not installed:**
+PHP dependencies are installed automatically during Docker build. If you encounter PHP errors, the build may have failed - check Docker Desktop logs or run manual installation as shown in [docs/guides/installation.md](docs/guides/installation.md).
 
 **Need help?** [Open an issue](https://github.com/leandrodsg/ai-ticket-classifier-api/issues)
 
