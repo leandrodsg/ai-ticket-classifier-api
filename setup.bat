@@ -44,14 +44,28 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Wait for container to be ready
+echo Waiting for container to be ready...
+timeout /t 10 /nobreak >nul
+
+REM Check if container is running
+docker-compose ps app | findstr "Up" >nul
+if errorlevel 1 (
+    echo ERROR: Container is not running. Checking container logs...
+    docker-compose logs app
+    exit /b 1
+)
+
 REM Install PHP dependencies (already done in Docker build with dev packages)
 echo PHP dependencies already installed in Docker image
 
 REM Generate APP_KEY using Laravel's artisan command
 echo Generating Laravel APP_KEY
-docker-compose exec -T app php artisan key:generate
+docker-compose exec app php artisan key:generate
 if errorlevel 1 (
     echo ERROR: Failed to generate APP_KEY
+    echo Checking container logs for more details...
+    docker-compose logs app
     exit /b 1
 )
 
