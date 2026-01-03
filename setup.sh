@@ -133,6 +133,38 @@ else
     print_status "SQLite database file already exists"
 fi
 
+# Check if Composer is installed locally
+if command_exists composer; then
+    print_status "Installing PHP dependencies locally (helps with IDE autocomplete)..."
+    if composer install --no-interaction; then
+        print_status "PHP dependencies installed successfully"
+    else
+        print_warning "Failed to install dependencies locally, but continuing..."
+        print_info "Dependencies will be installed in Docker during build."
+    fi
+else
+    print_warning "Composer not found locally."
+    print_info "Skipping local dependency installation - dependencies will be installed in Docker."
+    print_info "If you need to run PHP commands locally, install Composer from: https://getcomposer.org/"
+fi
+
+# Build and start containers (this will install dependencies via Dockerfile)
+print_status "Building and starting Docker containers..."
+docker-compose up -d --build
+
+# Wait for containers to be ready
+print_status "Waiting for containers to be ready..."
+sleep 10
+
+# Check if container is running
+if ! docker-compose ps | grep -q "Up"; then
+    print_error "Container is not running. Checking container logs..."
+    docker-compose logs app
+    exit 1
+fi
+
+print_status "Containers are running"
+
 # Generate APP_KEY using Laravel's artisan command
 print_status "Generating Laravel APP_KEY"
 docker-compose run --rm app php artisan key:generate
@@ -149,12 +181,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
     sed -i "s/^CSV_SIGNING_KEY=.*/CSV_SIGNING_KEY=$CSV_KEY/" .env
 fi
-
-print_status "Installing PHP dependencies..."
-docker-compose exec -T app composer install || {
-    print_error "Failed to install PHP dependencies"
-    exit 1
-}
 
 print_status "Setup completed successfully!"
 echo
