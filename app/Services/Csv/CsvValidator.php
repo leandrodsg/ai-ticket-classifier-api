@@ -155,7 +155,7 @@ class CsvValidator
     }
 
     /**
-     * Validate issue key format (PROJ-123)
+     * Validate issue key format (PROJ-123 or DEMO-201425-001)
      */
     private function validateIssueKey(string $value): ?string
     {
@@ -163,8 +163,9 @@ class CsvValidator
             return 'Issue key cannot exceed 20 characters';
         }
 
-        if (!preg_match('/^[A-Z]+-[0-9]+$/', $value)) {
-            return 'Issue key must be alphanumeric with hyphen format (e.g., PROJ-123)';
+        // Accept both formats: PROJ-123 (legacy) and DEMO-201425-001 (with timestamp)
+        if (!preg_match('/^[A-Z]+-(?:\d{6}-)?\d+$/', $value)) {
+            return 'Issue key must be alphanumeric with hyphen format (e.g., PROJ-123 or DEMO-201425-001)';
         }
 
         return null;

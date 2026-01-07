@@ -102,7 +102,7 @@ class CsvValidatorTest extends TestCase
 
         // Invalid format
         $error = $this->validator->validateField('issue_key', 'INVALID');
-        $this->assertEquals('Issue key must be alphanumeric with hyphen format (e.g., PROJ-123)', $error);
+        $this->assertEquals('Issue key must be alphanumeric with hyphen format (e.g., PROJ-123 or DEMO-201425-001)', $error);
 
         // Too long
         $error = $this->validator->validateField('issue_key', 'VERY-LONG-PROJECT-NAME-123');
@@ -295,7 +295,7 @@ class CsvValidatorTest extends TestCase
 
         $errors = $this->validator->validateRow($row);
 
-        $this->assertContains('Issue key must be alphanumeric with hyphen format (e.g., PROJ-123)', $errors);
+        $this->assertContains('Issue key must be alphanumeric with hyphen format (e.g., PROJ-123 or DEMO-201425-001)', $errors);
         $this->assertContains('Summary must be at least 5 characters long', $errors);
         $this->assertContains('Description must be at least 10 characters long', $errors);
         $this->assertContains('Reporter must be a valid email address', $errors);
