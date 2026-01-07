@@ -206,13 +206,13 @@ class TicketUploadService
         foreach ($sanitizedRows as $row) {
             // SECURITY: Check if issue_key already exists
             $existingTicket = Ticket::where('issue_key', $row['issue_key'])->first();
-            
+
             if ($existingTicket) {
                 Log::warning('Duplicate issue_key attempted', [
                     'issue_key' => $row['issue_key'],
                     'job_id' => $job->id,
                 ]);
-                
+
                 throw new ValidationException(
                     'One or more tickets contain duplicate issue keys',
                     ['error' => 'duplicate_ticket']
