@@ -64,8 +64,8 @@ class CsvGeneratorServiceTest extends TestCase
         $columns = str_getcsv($dataLine);
         $issueKey = $columns[0];
 
-        // Should match DEMO-XXX format
-        $this->assertMatchesRegularExpression('/^DEMO-\d{3}$/', $issueKey);
+        // Should match DEMO-TIMESTAMP-XXX format (e.g., DEMO-201845-001)
+        $this->assertMatchesRegularExpression('/^DEMO-\d{6}-\d{3}$/', $issueKey);
     }
 
     /** @test */
