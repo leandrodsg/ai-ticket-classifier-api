@@ -47,4 +47,11 @@ return [
         'auto_adjust_on_429' => true,
     ],
 
+    'prompt' => [
+        'version' => env('AI_PROMPT_VERSION', 'optimized'),
+        'max_tokens' => 700,
+        'include_examples' => true,
+        'verbose_mode' => false,
+    ],
+
 ];
