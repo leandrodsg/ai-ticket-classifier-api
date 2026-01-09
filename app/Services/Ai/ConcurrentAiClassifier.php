@@ -9,7 +9,7 @@ class ConcurrentAiClassifier
 {
     public function __construct(
         private OpenRouterClient $client,
-        private ClassificationPrompt $promptBuilder,
+        private PromptBuilderInterface $promptBuilder,
         private ModelDiscoveryService $discoveryService,
         private RateLimitDetector $rateLimitDetector,
         private ConcurrentStrategy $concurrentStrategy
