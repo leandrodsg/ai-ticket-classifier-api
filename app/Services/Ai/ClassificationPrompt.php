@@ -5,7 +5,7 @@ namespace App\Services\Ai;
 use App\Services\Security\PromptInjectionGuard;
 use Illuminate\Support\Facades\Log;
 
-class ClassificationPrompt
+class ClassificationPrompt implements PromptBuilderInterface
 {
     public function __construct(
         private PromptInjectionGuard $guard

@@ -15,8 +15,8 @@ class CsvValidator
             throw new ValidationException('CSV must contain at least one data row');
         }
 
-        if (count($rows) > 50) {
-            throw new ValidationException('CSV cannot contain more than 50 tickets');
+        if (count($rows) > 20) {
+            throw new ValidationException('CSV cannot contain more than 20 tickets');
         }
 
         $allErrors = [];

@@ -4,9 +4,9 @@ namespace Tests\Unit\Services\Ai;
 
 use App\Services\Ai\AiClassificationService;
 use App\Services\Ai\AllModelsFailedException;
-use App\Services\Ai\ClassificationPrompt;
 use App\Services\Ai\ModelDiscoveryService;
 use App\Services\Ai\OpenRouterClient;
+use App\Services\Ai\PromptBuilderInterface;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
@@ -14,7 +14,7 @@ class AiClassificationServiceTest extends TestCase
 {
     private AiClassificationService $service;
     private OpenRouterClient $mockClient;
-    private ClassificationPrompt $mockPrompt;
+    private PromptBuilderInterface $mockPrompt;
     private ModelDiscoveryService $mockDiscovery;
 
     protected function setUp(): void
@@ -22,7 +22,7 @@ class AiClassificationServiceTest extends TestCase
         parent::setUp();
 
         $this->mockClient = $this->createMock(OpenRouterClient::class);
-        $this->mockPrompt = $this->createMock(ClassificationPrompt::class);
+        $this->mockPrompt = $this->createMock(PromptBuilderInterface::class);
         $this->mockDiscovery = $this->createMock(ModelDiscoveryService::class);
 
         $this->service = new AiClassificationService(

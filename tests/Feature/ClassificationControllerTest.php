@@ -18,8 +18,8 @@ class ClassificationControllerTest extends TestCase
         parent::setUp();
         
         $apiKey = config('services.openrouter.api_key') ?: env('OPENROUTER_API_KEY');
-        if (!$apiKey) {
-            $this->markTestSkipped('OpenRouter API key not configured');
+        if (!$apiKey || str_contains($apiKey, 'fake-key-for-ci-testing')) {
+            $this->markTestSkipped('OpenRouter API key not configured or using fake key');
         }
     }
 
@@ -194,7 +194,7 @@ class ClassificationControllerTest extends TestCase
     public function test_too_many_tickets_returns_error()
     {
         $tickets = [];
-        for ($i = 1; $i <= 51; $i++) {
+        for ($i = 1; $i <= 21; $i++) {
             $tickets[] = [
                 "DEMO-{$i}",
                 'Support',
@@ -218,7 +218,7 @@ class ClassificationControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'error' => 'Maximum 50 tickets allowed per request',
+                'error' => 'Maximum 20 tickets allowed per request',
             ]);
     }
 

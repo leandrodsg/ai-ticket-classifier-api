@@ -127,10 +127,10 @@ class TicketUploadControllerTest extends TestCase
         $this->assertCount(1, $response->json('tickets'));
     }
 
-    public function test_it_processes_maximum_50_tickets()
+    public function test_it_processes_maximum_20_tickets()
     {
-        // Generate valid CSV with 50 tickets
-        $csvContent = $this->csvGenerator->generate(50);
+        // Generate valid CSV with 20 tickets
+        $csvContent = $this->csvGenerator->generate(20);
         $csvWithMetadata = $this->metadataGenerator->addMetadata($csvContent);
         $csvBase64 = base64_encode($csvWithMetadata);
 
@@ -139,8 +139,8 @@ class TicketUploadControllerTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $this->assertEquals(50, $response->json('metadata.total_tickets'));
-        $this->assertCount(50, $response->json('tickets'));
+        $this->assertEquals(20, $response->json('metadata.total_tickets'));
+        $this->assertCount(20, $response->json('tickets'));
     }
 
     public function test_it_returns_422_when_csv_content_is_missing()
@@ -283,8 +283,8 @@ class TicketUploadControllerTest extends TestCase
 
     public function test_it_returns_422_when_csv_has_too_many_rows()
     {
-        // Create CSV with 51 rows (exceeds limit)
-        $csvContent = $this->csvGenerator->generate(51);
+        // Create CSV with 21 rows (exceeds limit of 20)
+        $csvContent = $this->csvGenerator->generate(21);
         $csvWithMetadata = $this->metadataGenerator->addMetadata($csvContent);
         $csvBase64 = base64_encode($csvWithMetadata);
 
