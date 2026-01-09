@@ -194,7 +194,7 @@ class ClassificationControllerTest extends TestCase
     public function test_too_many_tickets_returns_error()
     {
         $tickets = [];
-        for ($i = 1; $i <= 51; $i++) {
+        for ($i = 1; $i <= 21; $i++) {
             $tickets[] = [
                 "DEMO-{$i}",
                 'Support',
@@ -218,7 +218,7 @@ class ClassificationControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'error' => 'Maximum 50 tickets allowed per request',
+                'error' => 'Maximum 20 tickets allowed per request',
             ]);
     }
 

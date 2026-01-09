@@ -4,7 +4,7 @@ namespace Tests\Unit\Services\Ai;
 
 use App\Services\Ai\ConcurrentAiClassifier;
 use App\Services\Ai\OpenRouterClient;
-use App\Services\Ai\ClassificationPrompt;
+use App\Services\Ai\PromptBuilderInterface;
 use App\Services\Ai\ModelDiscoveryService;
 use App\Services\Ai\RateLimitDetector;
 use App\Services\Ai\Strategies\ConcurrentStrategy;
@@ -43,7 +43,7 @@ class ConcurrentAiClassifierTest extends TestCase
     public function test_concurrent_classifier_can_be_instantiated()
     {
         $client = $this->mock(OpenRouterClient::class);
-        $prompt = $this->mock(ClassificationPrompt::class);
+        $prompt = $this->mock(PromptBuilderInterface::class);
         $discovery = $this->mock(ModelDiscoveryService::class);
         $rateLimitDetector = $this->mock(RateLimitDetector::class);
         $strategy = $this->mock(ConcurrentStrategy::class);
@@ -62,7 +62,7 @@ class ConcurrentAiClassifierTest extends TestCase
     public function test_classify_batch_returns_empty_array_for_empty_input()
     {
         $client = $this->mock(OpenRouterClient::class);
-        $prompt = $this->mock(ClassificationPrompt::class);
+        $prompt = $this->mock(PromptBuilderInterface::class);
         $discovery = $this->mock(ModelDiscoveryService::class);
         $rateLimitDetector = $this->mock(RateLimitDetector::class);
         $strategy = $this->mock(ConcurrentStrategy::class);
@@ -87,7 +87,7 @@ class ConcurrentAiClassifierTest extends TestCase
         $expectedResults = array_fill(0, 4, $this->createMockClassification());
 
         $client = $this->mock(OpenRouterClient::class);
-        $prompt = $this->mock(ClassificationPrompt::class);
+        $prompt = $this->mock(PromptBuilderInterface::class);
         $discovery = $this->mock(ModelDiscoveryService::class);
         $rateLimitDetector = $this->mock(RateLimitDetector::class);
         
@@ -126,7 +126,7 @@ class ConcurrentAiClassifierTest extends TestCase
         $expectedResults = array_fill(0, 15, $this->createMockClassification());
 
         $client = $this->mock(OpenRouterClient::class);
-        $prompt = $this->mock(ClassificationPrompt::class);
+        $prompt = $this->mock(PromptBuilderInterface::class);
         $discovery = $this->mock(ModelDiscoveryService::class);
         $rateLimitDetector = $this->mock(RateLimitDetector::class);
         
@@ -158,7 +158,7 @@ class ConcurrentAiClassifierTest extends TestCase
         $tickets = $this->createMockTickets(4);
 
         $client = $this->mock(OpenRouterClient::class);
-        $prompt = $this->mock(ClassificationPrompt::class);
+        $prompt = $this->mock(PromptBuilderInterface::class);
         $discovery = $this->mock(ModelDiscoveryService::class);
         $rateLimitDetector = $this->mock(RateLimitDetector::class);
         
@@ -211,7 +211,7 @@ class ConcurrentAiClassifierTest extends TestCase
         $expectedResults = array_fill(0, 20, $this->createMockClassification());
 
         $client = $this->mock(OpenRouterClient::class);
-        $prompt = $this->mock(ClassificationPrompt::class);
+        $prompt = $this->mock(PromptBuilderInterface::class);
         $discovery = $this->mock(ModelDiscoveryService::class);
         $rateLimitDetector = $this->mock(RateLimitDetector::class);
         
@@ -240,7 +240,7 @@ class ConcurrentAiClassifierTest extends TestCase
     public function test_get_processing_stats_returns_expected_structure()
     {
         $client = $this->mock(OpenRouterClient::class);
-        $prompt = $this->mock(ClassificationPrompt::class);
+        $prompt = $this->mock(PromptBuilderInterface::class);
         $discovery = $this->mock(ModelDiscoveryService::class);
         $rateLimitDetector = $this->mock(RateLimitDetector::class);
         $strategy = $this->mock(ConcurrentStrategy::class);

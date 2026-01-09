@@ -16,6 +16,11 @@ class ClassificationCacheRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Use array cache driver for tests to avoid database cache issues
+        config(['cache.default' => 'array']);
+        Cache::clear();
+        
         $this->cache = new ClassificationCacheRepository();
     }
 

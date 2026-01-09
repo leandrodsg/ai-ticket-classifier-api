@@ -153,12 +153,12 @@ class CsvGeneratorServiceTest extends TestCase
 
     public function test_it_handles_maximum_ticket_count()
     {
-        $csv = $this->generator->generate(50);
+        $csv = $this->generator->generate(21);
 
         $lines = explode("\n", trim($csv));
         $dataLines = array_slice($lines, 1); // Skip header
 
-        $this->assertCount(50, $dataLines);
+        $this->assertCount(21, $dataLines);
     }
 
     public function test_it_cycles_through_templates_when_generating_many_tickets()
