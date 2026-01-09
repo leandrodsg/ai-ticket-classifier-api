@@ -31,14 +31,18 @@ jobs:
       run: |
         php artisan key:generate
         php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
-        echo "OPENROUTER_API_KEY=sk-or-v1-fake-key-for-ci-testing" >> .env
-        echo "APP_ENV=testing" >> .env
 
     - name: Build containers
       run: docker compose up -d --build
+      env:
+        OPENROUTER_API_KEY: sk-or-v1-fake-key-for-ci-testing
+        APP_ENV: testing
 
     - name: Run migrations
       run: docker compose exec -T app php artisan migrate
+      env:
+        OPENROUTER_API_KEY: sk-or-v1-fake-key-for-ci-testing
+        APP_ENV: testing
 
     - name: Wait for app container to be healthy
       run: |
@@ -62,6 +66,9 @@ jobs:
 
     - name: Run tests
       run: docker compose exec -T app php artisan test
+      env:
+        OPENROUTER_API_KEY: sk-or-v1-fake-key-for-ci-testing
+        APP_ENV: testing
 
     - name: Stop containers
       run: docker compose down
