@@ -18,8 +18,8 @@ class ClassificationControllerTest extends TestCase
         parent::setUp();
         
         $apiKey = config('services.openrouter.api_key') ?: env('OPENROUTER_API_KEY');
-        if (!$apiKey) {
-            $this->markTestSkipped('OpenRouter API key not configured');
+        if (!$apiKey || str_contains($apiKey, 'fake-key-for-ci-testing')) {
+            $this->markTestSkipped('OpenRouter API key not configured or using fake key');
         }
     }
 
