@@ -16,8 +16,7 @@ class SlaCalculatorTest extends TestCase
         $this->calculator = new SlaCalculator();
     }
 
-    /** @test */
-    public function it_calculates_sla_due_date_for_critical_priority()
+    public function test_it_calculates_sla_due_date_for_critical_priority()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
         $expectedDueDate = Carbon::parse('2025-12-10T11:00:00Z');
@@ -27,8 +26,7 @@ class SlaCalculatorTest extends TestCase
         $this->assertEquals($expectedDueDate, $dueDate);
     }
 
-    /** @test */
-    public function it_calculates_sla_due_date_for_high_priority()
+    public function test_it_calculates_sla_due_date_for_high_priority()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
         $expectedDueDate = Carbon::parse('2025-12-10T14:00:00Z');
@@ -38,8 +36,7 @@ class SlaCalculatorTest extends TestCase
         $this->assertEquals($expectedDueDate, $dueDate);
     }
 
-    /** @test */
-    public function it_calculates_sla_due_date_for_medium_priority()
+    public function test_it_calculates_sla_due_date_for_medium_priority()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
         $expectedDueDate = Carbon::parse('2025-12-12T10:00:00Z');
@@ -49,8 +46,7 @@ class SlaCalculatorTest extends TestCase
         $this->assertEquals($expectedDueDate, $dueDate);
     }
 
-    /** @test */
-    public function it_calculates_sla_due_date_for_low_priority()
+    public function test_it_calculates_sla_due_date_for_low_priority()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
         $expectedDueDate = Carbon::parse('2025-12-17T10:00:00Z');
@@ -60,8 +56,7 @@ class SlaCalculatorTest extends TestCase
         $this->assertEquals($expectedDueDate, $dueDate);
     }
 
-    /** @test */
-    public function it_handles_case_insensitive_priority_input()
+    public function test_it_handles_case_insensitive_priority_input()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
 
@@ -76,8 +71,7 @@ class SlaCalculatorTest extends TestCase
         $this->assertEquals($expectedDueDate, $dueDate3);
     }
 
-    /** @test */
-    public function it_handles_timezones_correctly()
+    public function test_it_handles_timezones_correctly()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00+02:00'); // UTC+2
         $expectedDueDate = Carbon::parse('2025-12-10T11:00:00+02:00'); // Should maintain timezone
@@ -88,8 +82,7 @@ class SlaCalculatorTest extends TestCase
         $this->assertEquals('+02:00', $dueDate->getTimezone()->getName());
     }
 
-    /** @test */
-    public function it_does_not_modify_original_datetime()
+    public function test_it_does_not_modify_original_datetime()
     {
         $originalCreatedAt = Carbon::parse('2025-12-10T10:00:00Z');
         $createdAtCopy = $originalCreatedAt->copy();
@@ -100,8 +93,7 @@ class SlaCalculatorTest extends TestCase
         $this->assertEquals($createdAtCopy, $originalCreatedAt);
     }
 
-    /** @test */
-    public function it_throws_exception_for_invalid_priority()
+    public function test_it_throws_exception_for_invalid_priority()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
 
@@ -111,8 +103,7 @@ class SlaCalculatorTest extends TestCase
         $this->calculator->calculateDueDate('invalid', $createdAt);
     }
 
-    /** @test */
-    public function it_throws_exception_for_empty_priority()
+    public function test_it_throws_exception_for_empty_priority()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
 
@@ -122,8 +113,7 @@ class SlaCalculatorTest extends TestCase
         $this->calculator->calculateDueDate('', $createdAt);
     }
 
-    /** @test */
-    public function it_calculates_correct_sla_for_different_days_of_week()
+    public function test_it_calculates_correct_sla_for_different_days_of_week()
     {
         // Test with Friday to ensure weekend handling doesn't affect calculations
         $fridayCreatedAt = Carbon::parse('2025-12-13T10:00:00Z'); // Friday

@@ -18,8 +18,7 @@ class HmacSignatureServiceTest extends TestCase
         $this->service = new HmacSignatureService('test_csv_signing_key_for_testing_only');
     }
 
-    /** @test */
-    public function it_generates_signature_for_data()
+    public function test_it_generates_signature_for_data()
     {
         $data = ['key1' => 'value1', 'key2' => 'value2'];
         $signature = $this->service->generate($data);
@@ -29,8 +28,7 @@ class HmacSignatureServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $signature);
     }
 
-    /** @test */
-    public function it_validates_correct_signature()
+    public function test_it_validates_correct_signature()
     {
         $data = ['test' => 'data', 'version' => 'v1'];
         $signature = $this->service->generate($data);
@@ -40,8 +38,7 @@ class HmacSignatureServiceTest extends TestCase
         $this->assertTrue($isValid);
     }
 
-    /** @test */
-    public function it_rejects_tampered_data()
+    public function test_it_rejects_tampered_data()
     {
         $data = ['original' => 'data'];
         $signature = $this->service->generate($data);
@@ -54,8 +51,7 @@ class HmacSignatureServiceTest extends TestCase
         $this->assertFalse($isValid);
     }
 
-    /** @test */
-    public function it_rejects_wrong_signature()
+    public function test_it_rejects_wrong_signature()
     {
         $data = ['test' => 'data'];
         $wrongSignature = 'invalid_signature_hash';
@@ -65,8 +61,7 @@ class HmacSignatureServiceTest extends TestCase
         $this->assertFalse($isValid);
     }
 
-    /** @test */
-    public function it_handles_empty_data()
+    public function test_it_handles_empty_data()
     {
         $data = [];
         $signature = $this->service->generate($data);
@@ -78,8 +73,7 @@ class HmacSignatureServiceTest extends TestCase
         $this->assertTrue($isValid);
     }
 
-    /** @test */
-    public function it_handles_numeric_values()
+    public function test_it_handles_numeric_values()
     {
         $data = ['count' => 42, 'active' => true];
         $signature = $this->service->generate($data);
@@ -88,8 +82,7 @@ class HmacSignatureServiceTest extends TestCase
         $this->assertTrue($isValid);
     }
 
-    /** @test */
-    public function it_ensures_consistent_ordering()
+    public function test_it_ensures_consistent_ordering()
     {
         $data1 = ['z' => 'last', 'a' => 'first'];
         $data2 = ['a' => 'first', 'z' => 'last'];
@@ -101,16 +94,14 @@ class HmacSignatureServiceTest extends TestCase
         $this->assertEquals($signature1, $signature2);
     }
 
-    /** @test */
-    public function it_returns_correct_algorithm()
+    public function test_it_returns_correct_algorithm()
     {
         $algorithm = $this->service->getAlgorithm();
 
         $this->assertEquals('sha256', $algorithm);
     }
 
-    /** @test */
-    public function it_throws_exception_when_app_key_not_configured()
+    public function test_it_throws_exception_when_app_key_not_configured()
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('CSV_SIGNING_KEY is not configured');
@@ -118,8 +109,7 @@ class HmacSignatureServiceTest extends TestCase
         new HmacSignatureService('');
     }
 
-    /** @test */
-    public function it_throws_exception_when_config_is_null()
+    public function test_it_throws_exception_when_config_is_null()
     {
         config(['services.csv.signing_key' => null]);
 
@@ -129,8 +119,7 @@ class HmacSignatureServiceTest extends TestCase
         new HmacSignatureService(); // Sem passar key, usa config
     }
 
-    /** @test */
-    public function it_loads_key_from_config_when_not_provided()
+    public function test_it_loads_key_from_config_when_not_provided()
     {
         config(['services.csv.signing_key' => 'config_test_key']);
 

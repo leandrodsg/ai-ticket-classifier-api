@@ -23,8 +23,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->metadataGenerator = new CsvMetadataGenerator($this->hmacService);
     }
 
-    /** @test */
-    public function it_adds_metadata_to_csv_content()
+    public function test_it_adds_metadata_to_csv_content()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -42,8 +41,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertStringContainsString($csvContent, $result);
     }
 
-    /** @test */
-    public function it_generates_valid_uuid_for_session_id()
+    public function test_it_generates_valid_uuid_for_session_id()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -56,8 +54,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/', $sessionId);
     }
 
-    /** @test */
-    public function it_generates_32_character_nonce()
+    public function test_it_generates_32_character_nonce()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -71,8 +68,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9]+$/', $nonce);
     }
 
-    /** @test */
-    public function it_counts_data_rows_correctly()
+    public function test_it_counts_data_rows_correctly()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test 1,Description 1,test1@example.com\nDEMO-002,Test 2,Description 2,test2@example.com\nDEMO-003,Test 3,Description 3,test3@example.com\n";
 
@@ -81,8 +77,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertStringContainsString('# row_count: 3', $result);
     }
 
-    /** @test */
-    public function it_counts_data_rows_ignoring_empty_lines()
+    public function test_it_counts_data_rows_ignoring_empty_lines()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test 1,Description 1,test1@example.com\n\nDEMO-002,Test 2,Description 2,test2@example.com\n";
 
@@ -91,8 +86,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertStringContainsString('# row_count: 2', $result);
     }
 
-    /** @test */
-    public function it_generates_iso8601_timestamp()
+    public function test_it_generates_iso8601_timestamp()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -106,8 +100,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|\+\d{2}:\d{2})?$/', $timestamp);
     }
 
-    /** @test */
-    public function it_generates_expires_at_one_hour_from_now()
+    public function test_it_generates_expires_at_one_hour_from_now()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -128,8 +121,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertLessThan(2, $diffInMinutes, 'Expiry should be approximately 1 hour from generation time');
     }
 
-    /** @test */
-    public function it_generates_valid_hmac_signature()
+    public function test_it_generates_valid_hmac_signature()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -156,8 +148,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertEquals($expectedSignature, $signature);
     }
 
-    /** @test */
-    public function it_preserves_original_csv_content()
+    public function test_it_preserves_original_csv_content()
     {
         $originalCsv = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -166,8 +157,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertStringContainsString($originalCsv, $result);
     }
 
-    /** @test */
-    public function it_adds_blank_line_after_metadata()
+    public function test_it_adds_blank_line_after_metadata()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\nDEMO-001,Test,Description,test@example.com\n";
 
@@ -177,8 +167,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertStringContainsString("# END METADATA\n\nIssue Key", $result);
     }
 
-    /** @test */
-    public function it_handles_csv_with_no_data_rows()
+    public function test_it_handles_csv_with_no_data_rows()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\n";
 
@@ -187,8 +176,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertStringContainsString('# row_count: 0', $result);
     }
 
-    /** @test */
-    public function it_handles_large_csv_content()
+    public function test_it_handles_large_csv_content()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\n";
         for ($i = 1; $i <= 50; $i++) {
@@ -200,8 +188,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertStringContainsString('# row_count: 50', $result);
     }
 
-    /** @test */
-    public function it_extracts_metadata_correctly()
+    public function test_it_extracts_metadata_correctly()
     {
         $csvContent = "Issue Key,Summary\nDEMO-001,Test\n";
         $csvWithMetadata = $this->metadataGenerator->addMetadata($csvContent);
@@ -226,8 +213,7 @@ class CsvMetadataGeneratorTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/', $metadata['session_id']);
     }
 
-    /** @test */
-    public function it_handles_malformed_metadata_gracefully()
+    public function test_it_handles_malformed_metadata_gracefully()
     {
         $badCsv = "# METADATA\n# broken: metadata\nIssue Key\n";
 

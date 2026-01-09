@@ -15,8 +15,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->generator = new CsvGeneratorService();
     }
 
-    /** @test */
-    public function it_generates_csv_with_correct_header()
+    public function test_it_generates_csv_with_correct_header()
     {
         $csv = $this->generator->generate(1);
 
@@ -26,8 +25,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertEquals('Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels', $header);
     }
 
-    /** @test */
-    public function it_generates_requested_number_of_tickets()
+    public function test_it_generates_requested_number_of_tickets()
     {
         $csv = $this->generator->generate(3);
 
@@ -37,8 +35,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertCount(3, $dataLines);
     }
 
-    /** @test */
-    public function it_generates_unique_issue_keys()
+    public function test_it_generates_unique_issue_keys()
     {
         $csv = $this->generator->generate(5);
 
@@ -54,8 +51,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertCount(5, array_unique($issueKeys)); // All unique
     }
 
-    /** @test */
-    public function it_generates_issue_keys_with_correct_format()
+    public function test_it_generates_issue_keys_with_correct_format()
     {
         $csv = $this->generator->generate(1);
 
@@ -68,8 +64,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/^DEMO-\d{6}-\d{3}$/', $issueKey);
     }
 
-    /** @test */
-    public function it_generates_realistic_content()
+    public function test_it_generates_realistic_content()
     {
         $csv = $this->generator->generate(1);
 
@@ -93,8 +88,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertTrue($hasRealisticContent, 'Generated content should contain realistic text');
     }
 
-    /** @test */
-    public function it_generates_valid_email_addresses()
+    public function test_it_generates_valid_email_addresses()
     {
         $csv = $this->generator->generate(2);
 
@@ -111,8 +105,7 @@ class CsvGeneratorServiceTest extends TestCase
         }
     }
 
-    /** @test */
-    public function it_generates_varied_issue_types()
+    public function test_it_generates_varied_issue_types()
     {
         $csv = $this->generator->generate(10);
 
@@ -129,8 +122,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertGreaterThan(1, count($uniqueTypes), 'Should generate varied issue types');
     }
 
-    /** @test */
-    public function it_generates_varied_priorities()
+    public function test_it_generates_varied_priorities()
     {
         $csv = $this->generator->generate(10);
 
@@ -147,8 +139,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertGreaterThan(1, count($uniquePriorities), 'Should generate varied priorities');
     }
 
-    /** @test */
-    public function it_escapes_csv_fields_with_commas()
+    public function test_it_escapes_csv_fields_with_commas()
     {
         // Create a generator with a template that has commas in description
         $csv = $this->generator->generate(1);
@@ -160,8 +151,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertStringContainsString('"', $dataLine, 'Should contain quoted fields for commas');
     }
 
-    /** @test */
-    public function it_handles_maximum_ticket_count()
+    public function test_it_handles_maximum_ticket_count()
     {
         $csv = $this->generator->generate(50);
 
@@ -171,8 +161,7 @@ class CsvGeneratorServiceTest extends TestCase
         $this->assertCount(50, $dataLines);
     }
 
-    /** @test */
-    public function it_cycles_through_templates_when_generating_many_tickets()
+    public function test_it_cycles_through_templates_when_generating_many_tickets()
     {
         $csv = $this->generator->generate(15); // More than available templates (10)
 

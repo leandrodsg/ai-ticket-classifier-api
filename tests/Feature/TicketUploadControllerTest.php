@@ -56,8 +56,7 @@ class TicketUploadControllerTest extends TestCase
         return $this->metadataGenerator->addMetadata($csvContent);
     }
 
-    /** @test */
-    public function it_returns_200_with_valid_csv_upload_and_classifications()
+    public function test_it_returns_200_with_valid_csv_upload_and_classifications()
     {
         // Generate valid CSV with metadata
         $csvContent = $this->csvGenerator->generate(3);
@@ -112,8 +111,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertDatabaseCount('tickets', 3);
     }
 
-    /** @test */
-    public function it_processes_single_ticket_successfully()
+    public function test_it_processes_single_ticket_successfully()
     {
         // Generate valid CSV with 1 ticket
         $csvContent = $this->csvGenerator->generate(1);
@@ -129,8 +127,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertCount(1, $response->json('tickets'));
     }
 
-    /** @test */
-    public function it_processes_maximum_50_tickets()
+    public function test_it_processes_maximum_50_tickets()
     {
         // Generate valid CSV with 50 tickets
         $csvContent = $this->csvGenerator->generate(50);
@@ -146,8 +143,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertCount(50, $response->json('tickets'));
     }
 
-    /** @test */
-    public function it_returns_422_when_csv_content_is_missing()
+    public function test_it_returns_422_when_csv_content_is_missing()
     {
         $response = $this->postJson('/api/tickets/upload', []);
 
@@ -161,8 +157,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertArrayHasKey('csv_content', $response->json('details'));
     }
 
-    /** @test */
-    public function it_returns_400_when_csv_content_is_invalid_base64()
+    public function test_it_returns_400_when_csv_content_is_invalid_base64()
     {
         $response = $this->postJson('/api/tickets/upload', [
             'csv_content' => 'invalid_base64_content!@#$%'
@@ -176,8 +171,7 @@ class TicketUploadControllerTest extends TestCase
                 ]);
     }
 
-    /** @test */
-    public function it_returns_413_when_csv_file_is_too_large()
+    public function test_it_returns_413_when_csv_file_is_too_large()
     {
         // Create a CSV larger than 5MB
         $largeContent = str_repeat('x', 6 * 1024 * 1024); // 6MB
@@ -198,8 +192,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertArrayHasKey('max_size', $response->json('details'));
     }
 
-    /** @test */
-    public function it_returns_400_when_csv_signature_is_invalid()
+    public function test_it_returns_400_when_csv_signature_is_invalid()
     {
         // Generate CSV and tamper with signature
         $csvContent = $this->csvGenerator->generate(1);
@@ -224,8 +217,7 @@ class TicketUploadControllerTest extends TestCase
                 ]);
     }
 
-    /** @test */
-    public function it_returns_400_when_csv_has_expired()
+    public function test_it_returns_400_when_csv_has_expired()
     {
         // Generate CSV with metadata
         $csvContent = $this->csvGenerator->generate(1);
@@ -250,8 +242,7 @@ class TicketUploadControllerTest extends TestCase
                 ]);
     }
 
-    /** @test */
-    public function it_returns_400_when_nonce_is_already_used()
+    public function test_it_returns_400_when_nonce_is_already_used()
     {
         // First, generate and upload a valid CSV
         $csvContent = $this->csvGenerator->generate(1);
@@ -274,8 +265,7 @@ class TicketUploadControllerTest extends TestCase
                 ]);
     }
 
-    /** @test */
-    public function it_returns_422_when_csv_has_no_data_rows()
+    public function test_it_returns_422_when_csv_has_no_data_rows()
     {
         // Create CSV with header but no data rows
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels\n";
@@ -291,8 +281,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('at least one', strtolower($response->json('message')));
     }
 
-    /** @test */
-    public function it_returns_422_when_csv_has_too_many_rows()
+    public function test_it_returns_422_when_csv_has_too_many_rows()
     {
         // Create CSV with 51 rows (exceeds limit)
         $csvContent = $this->csvGenerator->generate(51);
@@ -307,8 +296,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('validation_error', $response->json('error'));
     }
 
-    /** @test */
-    public function it_returns_422_when_required_fields_are_missing()
+    public function test_it_returns_422_when_required_fields_are_missing()
     {
         // Create CSV with missing required fields
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels\n";
@@ -323,8 +311,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('validation', strtolower($response->json('error')));
     }
 
-    /** @test */
-    public function it_returns_422_when_issue_key_format_is_invalid()
+    public function test_it_returns_422_when_issue_key_format_is_invalid()
     {
         // Create CSV with invalid issue key format (missing hyphen-number)
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels\n";
@@ -339,8 +326,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('validation', strtolower($response->json('error')));
     }
 
-    /** @test */
-    public function it_returns_422_when_summary_is_too_short()
+    public function test_it_returns_422_when_summary_is_too_short()
     {
         // Create CSV with summary too short (< 5 chars)
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels\n";
@@ -355,8 +341,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('validation', strtolower($response->json('error')));
     }
 
-    /** @test */
-    public function it_returns_422_when_description_is_too_short()
+    public function test_it_returns_422_when_description_is_too_short()
     {
         // Create CSV with description too short (< 10 chars)
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels\n";
@@ -371,8 +356,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('validation', strtolower($response->json('error')));
     }
 
-    /** @test */
-    public function it_returns_422_when_reporter_email_is_invalid()
+    public function test_it_returns_422_when_reporter_email_is_invalid()
     {
         // Create CSV with invalid email
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels\n";
@@ -387,8 +371,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('validation', strtolower($response->json('error')));
     }
 
-    /** @test */
-    public function it_returns_422_when_reporter_uses_disposable_email()
+    public function test_it_returns_422_when_reporter_uses_disposable_email()
     {
         // Create CSV with disposable email
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter,Assignee,Priority,Status,Created,Labels\n";
@@ -403,8 +386,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertStringContainsString('validation', strtolower($response->json('error')));
     }
 
-    /** @test */
-    public function it_saves_tickets_to_database_with_correct_classifications()
+    public function test_it_saves_tickets_to_database_with_correct_classifications()
     {
         // Generate valid CSV
         $csvContent = $this->csvGenerator->generate(2);
@@ -438,8 +420,7 @@ class TicketUploadControllerTest extends TestCase
         }
     }
 
-    /** @test */
-    public function it_measures_processing_time_accurately()
+    public function test_it_measures_processing_time_accurately()
     {
         // Generate valid CSV
         $csvContent = $this->csvGenerator->generate(1);
@@ -458,8 +439,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertLessThan(30000, $processingTime); // Should be reasonable
     }
 
-    /** @test */
-    public function it_handles_filename_parameter_gracefully()
+    public function test_it_handles_filename_parameter_gracefully()
     {
         // Generate valid CSV
         $csvContent = $this->csvGenerator->generate(1);
@@ -475,8 +455,7 @@ class TicketUploadControllerTest extends TestCase
         // Filename is accepted but not used in processing
     }
 
-    /** @test */
-    public function it_enforces_rate_limiting_on_upload_endpoint()
+    public function test_it_enforces_rate_limiting_on_upload_endpoint()
     {
         // This test focuses on rate limiting, not full ticket processing
         // We'll skip detailed assertions to avoid database constraint issues
@@ -528,8 +507,7 @@ class TicketUploadControllerTest extends TestCase
         $this->assertGreaterThanOrEqual(25, $successCount, 'Should allow at least 25 requests before rate limiting');
     }
 
-    /** @test */
-    public function it_prevents_duplicate_issue_keys_across_uploads()
+    public function test_it_prevents_duplicate_issue_keys_across_uploads()
     {
         // First upload - create DEMO-001
         $csv1 = <<<CSV
@@ -569,8 +547,7 @@ CSV;
         $this->assertDatabaseHas('tickets', ['issue_key' => 'DEMO-001']);
     }
 
-    /** @test */
-    public function it_prevents_nonce_reuse_even_with_quick_successive_requests()
+    public function test_it_prevents_nonce_reuse_even_with_quick_successive_requests()
     {
         // Generate CSV with metadata (includes nonce)
         $csvContent = $this->csvGenerator->generate(1);
@@ -601,16 +578,14 @@ CSV;
         $this->assertDatabaseCount('tickets', 1);
     }
 
-    /** @test */
-    public function it_returns_503_when_ai_service_is_unavailable()
+    public function test_it_returns_503_when_ai_service_is_unavailable()
     {
         // This would require mocking the AI service to simulate failure
         // For now, we'll test that the endpoint exists and handles errors
         $this->assertTrue(true); // Placeholder for future AI failure test
     }
 
-    /** @test */
-    public function it_returns_500_for_unexpected_internal_errors()
+    public function test_it_returns_500_for_unexpected_internal_errors()
     {
         // This would require mocking services to throw unexpected exceptions
         // For now, we'll test that the endpoint exists and handles errors
