@@ -25,8 +25,7 @@ class PriorityCalculationServiceTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_calculates_complete_priority_and_sla_information()
+    public function test_it_calculates_complete_priority_and_sla_information()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
 
@@ -42,16 +41,14 @@ class PriorityCalculationServiceTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    /** @test */
-    public function it_calculates_priority_only()
+    public function test_it_calculates_priority_only()
     {
         $priority = $this->service->calculatePriority('High', 'Medium');
 
         $this->assertEquals('High', $priority);
     }
 
-    /** @test */
-    public function it_calculates_sla_due_date_only()
+    public function test_it_calculates_sla_due_date_only()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
         $expectedDueDate = Carbon::parse('2025-12-10T14:00:00Z');
@@ -61,8 +58,7 @@ class PriorityCalculationServiceTest extends TestCase
         $this->assertEquals($expectedDueDate, $dueDate);
     }
 
-    /** @test */
-    public function it_handles_case_insensitive_input_in_complete_calculation()
+    public function test_it_handles_case_insensitive_input_in_complete_calculation()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
 
@@ -78,8 +74,7 @@ class PriorityCalculationServiceTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    /** @test */
-    public function it_returns_correct_data_types()
+    public function test_it_returns_correct_data_types()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
 
@@ -92,8 +87,7 @@ class PriorityCalculationServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/', $result['sla_due_date']);
     }
 
-    /** @test */
-    public function it_calculates_different_priority_levels_correctly()
+    public function test_it_calculates_different_priority_levels_correctly()
     {
         $createdAt = Carbon::parse('2025-12-10T10:00:00Z');
 

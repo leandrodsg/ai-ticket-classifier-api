@@ -116,7 +116,15 @@ class HealthCheckController extends Controller
                 ];
             }
 
-            $httpResponse = Http::timeout(5)
+            // Skip actual API check in testing/CI environments
+            if (app()->environment('testing') || str_contains($apiKey, 'fake-key-for-ci')) {
+                return [
+                    'status' => 'degraded',
+                    'message' => 'OpenRouter API check skipped in testing environment',
+                ];
+            }
+
+            $httpResponse = Http::timeout(3)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $apiKey,
                 ])

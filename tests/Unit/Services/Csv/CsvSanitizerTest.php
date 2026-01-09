@@ -15,8 +15,7 @@ class CsvSanitizerTest extends TestCase
         $this->sanitizer = new CsvSanitizer();
     }
 
-    /** @test */
-    public function it_removes_formula_injection_characters()
+    public function test_it_removes_formula_injection_characters()
     {
         $value = '=SUM(A1:A10)';
         $result = $this->sanitizer->removeFormulaChars($value);
@@ -35,16 +34,14 @@ class CsvSanitizerTest extends TestCase
         $this->assertEquals('TAB_FUNCTION()', $result);
     }
 
-    /** @test */
-    public function it_removes_formula_patterns_within_text()
+    public function test_it_removes_formula_patterns_within_text()
     {
         $value = 'Some text =SUM(A1) more text';
         $result = $this->sanitizer->removeFormulaChars($value);
         $this->assertEquals('Some text =SUM(A1) more text', $result); // Only removes from start
     }
 
-    /** @test */
-    public function it_escapes_quotes()
+    public function test_it_escapes_quotes()
     {
         $value = 'Text with "quotes" inside';
         $result = $this->sanitizer->escapeQuotes($value);
@@ -55,8 +52,7 @@ class CsvSanitizerTest extends TestCase
         $this->assertEquals('Single ""quote""', $result);
     }
 
-    /** @test */
-    public function it_wraps_in_quotes_when_contains_special_chars()
+    public function test_it_wraps_in_quotes_when_contains_special_chars()
     {
         $value = 'Text, with comma';
         $result = $this->sanitizer->wrapInQuotes($value);
@@ -75,8 +71,7 @@ class CsvSanitizerTest extends TestCase
         $this->assertEquals('"Text "with quotes""', $result);
     }
 
-    /** @test */
-    public function it_does_not_wrap_when_no_special_chars()
+    public function test_it_does_not_wrap_when_no_special_chars()
     {
         $value = 'Simple text without special chars';
         $result = $this->sanitizer->wrapInQuotes($value);
@@ -87,8 +82,7 @@ class CsvSanitizerTest extends TestCase
         $this->assertEquals('Text with spaces and numbers 123', $result);
     }
 
-    /** @test */
-    public function it_sanitizes_complete_csv_content()
+    public function test_it_sanitizes_complete_csv_content()
     {
         $csvContent = "# METADATA - DO NOT EDIT THIS SECTION\n" .
                       "# version: v1\n" .
@@ -109,8 +103,7 @@ class CsvSanitizerTest extends TestCase
         $this->assertStringContainsString('"Description, with comma"', $result); // Wrapped in quotes
     }
 
-    /** @test */
-    public function it_preserves_metadata_unchanged()
+    public function test_it_preserves_metadata_unchanged()
     {
         $csvContent = "# METADATA - DO NOT EDIT THIS SECTION\n" .
                       "# version: v1\n" .
@@ -125,8 +118,7 @@ class CsvSanitizerTest extends TestCase
         $this->assertStringContainsString('# signature: =FORMULA()', $result);
     }
 
-    /** @test */
-    public function it_handles_empty_lines()
+    public function test_it_handles_empty_lines()
     {
         $csvContent = "Issue Key,Summary\n\n" .
                       "DEMO-001,Test\n" .
@@ -143,8 +135,7 @@ class CsvSanitizerTest extends TestCase
         $this->assertEquals("DEMO-002,Another test", $lines[4]);
     }
 
-    /** @test */
-    public function it_sanitizes_complex_csv_with_multiple_issues()
+    public function test_it_sanitizes_complex_csv_with_multiple_issues()
     {
         $csvContent = "Issue Key,Issue Type,Summary,Description,Reporter\n" .
                       "DEMO-001,Support,=FORMULA(),\"Text with \"quotes\" and, comma\",user@example.com\n" .

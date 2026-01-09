@@ -11,8 +11,7 @@ class TicketQueryControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_returns_404_when_job_not_found()
+    public function test_it_returns_404_when_job_not_found()
     {
         $response = $this->getJson('/api/tickets/non-existent-uuid');
 
@@ -23,8 +22,7 @@ class TicketQueryControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
-    public function it_returns_pending_job_status()
+    public function test_it_returns_pending_job_status()
     {
         $job = ClassificationJob::factory()->create([
             'status' => 'pending',
@@ -40,8 +38,7 @@ class TicketQueryControllerTest extends TestCase
             ->assertJsonMissing(['results', 'tickets']);
     }
 
-    /** @test */
-    public function it_returns_processing_job_status()
+    public function test_it_returns_processing_job_status()
     {
         $job = ClassificationJob::factory()->create([
             'status' => 'processing',
@@ -57,8 +54,7 @@ class TicketQueryControllerTest extends TestCase
             ->assertJsonMissing(['results', 'tickets']);
     }
 
-    /** @test */
-    public function it_returns_completed_job_with_results()
+    public function test_it_returns_completed_job_with_results()
     {
         $job = ClassificationJob::factory()->completed()->create();
         
@@ -104,8 +100,7 @@ class TicketQueryControllerTest extends TestCase
         $this->assertEquals('Technical', $response->json('tickets.0.category'));
     }
 
-    /** @test */
-    public function it_returns_failed_job_with_error()
+    public function test_it_returns_failed_job_with_error()
     {
         $job = ClassificationJob::factory()->failed()->create();
 
@@ -126,8 +121,7 @@ class TicketQueryControllerTest extends TestCase
             ->assertJsonMissing(['tickets']);
     }
 
-    /** @test */
-    public function it_returns_multiple_tickets_for_completed_job()
+    public function test_it_returns_multiple_tickets_for_completed_job()
     {
         $job = ClassificationJob::factory()->completed()->create();
         
@@ -141,8 +135,7 @@ class TicketQueryControllerTest extends TestCase
             ->assertJsonCount(3, 'tickets');
     }
 
-    /** @test */
-    public function it_returns_iso8601_timestamps()
+    public function test_it_returns_iso8601_timestamps()
     {
         $job = ClassificationJob::factory()->completed()->create();
 
@@ -157,16 +150,14 @@ class TicketQueryControllerTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $completedAt);
     }
 
-    /** @test */
-    public function it_handles_invalid_uuid_format()
+    public function test_it_handles_invalid_uuid_format()
     {
         $response = $this->getJson('/api/tickets/invalid-uuid-format');
 
         $response->assertStatus(404);
     }
 
-    /** @test */
-    public function it_does_not_expose_sensitive_ticket_data()
+    public function test_it_does_not_expose_sensitive_ticket_data()
     {
         $job = ClassificationJob::factory()->completed()->create();
         
@@ -182,8 +173,7 @@ class TicketQueryControllerTest extends TestCase
             ->assertJsonMissing(['reporter', 'description']);
     }
 
-    /** @test */
-    public function it_returns_tickets_with_all_classification_fields()
+    public function test_it_returns_tickets_with_all_classification_fields()
     {
         $job = ClassificationJob::factory()->completed()->create();
         
@@ -208,8 +198,7 @@ class TicketQueryControllerTest extends TestCase
         $this->assertEquals('Critical', $ticket['priority']);
     }
 
-    /** @test */
-    public function it_includes_sla_due_date_when_available()
+    public function test_it_includes_sla_due_date_when_available()
     {
         $job = ClassificationJob::factory()->completed()->create();
         
@@ -226,8 +215,7 @@ class TicketQueryControllerTest extends TestCase
         $this->assertNotNull($response->json('tickets.0.sla_due_date'));
     }
 
-    /** @test */
-    public function it_handles_null_sla_due_date()
+    public function test_it_handles_null_sla_due_date()
     {
         $job = ClassificationJob::factory()->completed()->create();
         

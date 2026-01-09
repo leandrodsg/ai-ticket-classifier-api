@@ -15,8 +15,7 @@ class CsvValidatorTest extends TestCase
         $this->validator = new CsvValidator();
     }
 
-    /** @test */
-    public function it_validates_schema_with_valid_rows()
+    public function test_it_validates_schema_with_valid_rows()
     {
         $rows = [
             [
@@ -37,8 +36,7 @@ class CsvValidatorTest extends TestCase
         $this->assertTrue($result);
     }
 
-    /** @test */
-    public function it_rejects_schema_with_invalid_rows()
+    public function test_it_rejects_schema_with_invalid_rows()
     {
         $this->expectException(\App\Exceptions\ValidationException::class);
         
@@ -60,8 +58,7 @@ class CsvValidatorTest extends TestCase
         $this->validator->validateSchema($rows);
     }
 
-    /** @test */
-    public function it_validates_row_with_all_valid_fields()
+    public function test_it_validates_row_with_all_valid_fields()
     {
         $row = [
             'issue_key' => 'PROJ-123',
@@ -79,8 +76,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEmpty($errors);
     }
 
-    /** @test */
-    public function it_detects_missing_required_fields()
+    public function test_it_detects_missing_required_fields()
     {
         $row = [
             'issue_key' => 'PROJ-123',
@@ -93,8 +89,7 @@ class CsvValidatorTest extends TestCase
         $this->assertContains("Field 'summary' is required", $errors);
     }
 
-    /** @test */
-    public function it_validates_issue_key_format()
+    public function test_it_validates_issue_key_format()
     {
         // Valid
         $error = $this->validator->validateField('issue_key', 'PROJ-123');
@@ -109,8 +104,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Issue key cannot exceed 20 characters', $error);
     }
 
-    /** @test */
-    public function it_validates_summary_length()
+    public function test_it_validates_summary_length()
     {
         // Valid
         $error = $this->validator->validateField('summary', 'Valid summary text');
@@ -126,8 +120,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Summary cannot exceed 200 characters', $error);
     }
 
-    /** @test */
-    public function it_validates_description_length()
+    public function test_it_validates_description_length()
     {
         // Valid
         $error = $this->validator->validateField('description', 'This is a valid description with enough characters.');
@@ -143,8 +136,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Description cannot exceed 2000 characters', $error);
     }
 
-    /** @test */
-    public function it_validates_email_format()
+    public function test_it_validates_email_format()
     {
         // Valid reporter
         $error = $this->validator->validateField('reporter', 'user@example.com');
@@ -164,8 +156,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Reporter email cannot exceed 255 characters', $error);
     }
 
-    /** @test */
-    public function it_blocks_disposable_emails()
+    public function test_it_blocks_disposable_emails()
     {
         $disposableEmails = [
             'user@temp-mail.org',
@@ -180,15 +171,13 @@ class CsvValidatorTest extends TestCase
         }
     }
 
-    /** @test */
-    public function it_allows_plus_addressing()
+    public function test_it_allows_plus_addressing()
     {
         $error = $this->validator->validateField('reporter', 'user+tag@example.com');
         $this->assertNull($error);
     }
 
-    /** @test */
-    public function it_validates_priority_enum()
+    public function test_it_validates_priority_enum()
     {
         // Valid priorities
         $validPriorities = ['Critical', 'High', 'Medium', 'Low'];
@@ -202,8 +191,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Priority must be one of: Critical, High, Medium, Low', $error);
     }
 
-    /** @test */
-    public function it_validates_status_enum()
+    public function test_it_validates_status_enum()
     {
         // Valid statuses
         $validStatuses = ['Open', 'In Progress', 'Resolved', 'Closed'];
@@ -217,8 +205,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Status must be one of: Open, In Progress, Resolved, Closed', $error);
     }
 
-    /** @test */
-    public function it_validates_created_timestamp()
+    public function test_it_validates_created_timestamp()
     {
         // Valid ISO 8601
         $error = $this->validator->validateField('created', '2025-12-26T10:00:00Z');
@@ -237,8 +224,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Created date cannot be in the future', $error);
     }
 
-    /** @test */
-    public function it_validates_labels_format()
+    public function test_it_validates_labels_format()
     {
         // Valid labels
         $error = $this->validator->validateField('labels', 'bug,urgent,high-priority');
@@ -257,8 +243,7 @@ class CsvValidatorTest extends TestCase
         $this->assertEquals('Labels must contain only letters, numbers, semicolons, commas, hyphens, and spaces', $error);
     }
 
-    /** @test */
-    public function it_handles_optional_assignee()
+    public function test_it_handles_optional_assignee()
     {
         // Valid assignee
         $row = [
@@ -282,8 +267,7 @@ class CsvValidatorTest extends TestCase
         $this->assertContains('Assignee must be a valid email address', $errors);
     }
 
-    /** @test */
-    public function it_returns_multiple_errors_for_invalid_row()
+    public function test_it_returns_multiple_errors_for_invalid_row()
     {
         $row = [
             'issue_key' => 'INVALID',

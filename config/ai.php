@@ -32,4 +32,19 @@ return [
         'driver' => env('AI_CACHE_DRIVER', null),
     ],
 
+    'concurrency' => [
+        'enabled' => env('AI_CONCURRENCY_ENABLED', true),
+        'concurrent_requests' => env('AI_CONCURRENT_REQUESTS', 4),
+        'batch_size' => 4,
+        'timeout_per_request' => 20,
+        'fallback_to_sequential' => true,
+    ],
+
+    'rate_limiting' => [
+        'rpm_limit' => 20,
+        'delay_between_batches_ms' => 0,
+        'enable_429_detection' => true,
+        'auto_adjust_on_429' => true,
+    ],
+
 ];

@@ -15,8 +15,7 @@ class CsvParserTest extends TestCase
         $this->parser = new CsvParser();
     }
 
-    /** @test */
-    public function it_parses_valid_csv_correctly()
+    public function test_it_parses_valid_csv_correctly()
     {
         $csvContent = $this->getValidCsvContent();
 
@@ -30,8 +29,7 @@ class CsvParserTest extends TestCase
         $this->assertCount(2, $result['data_rows']);
     }
 
-    /** @test */
-    public function it_extracts_metadata_section()
+    public function test_it_extracts_metadata_section()
     {
         $csvContent = $this->getValidCsvContent();
 
@@ -46,8 +44,7 @@ class CsvParserTest extends TestCase
         $this->assertEquals('2025-12-26T21:00:00Z', $metadata['expires_at']);
     }
 
-    /** @test */
-    public function it_extracts_data_rows_correctly()
+    public function test_it_extracts_data_rows_correctly()
     {
         $csvContent = $this->getValidCsvContent();
 
@@ -67,8 +64,7 @@ class CsvParserTest extends TestCase
         $this->assertEquals('Bug', $dataRows[1]['issue_type']);
     }
 
-    /** @test */
-    public function it_counts_rows_ignoring_metadata_header_and_empty_lines()
+    public function test_it_counts_rows_ignoring_metadata_header_and_empty_lines()
     {
         $csvContent = $this->getValidCsvContent();
 
@@ -77,8 +73,7 @@ class CsvParserTest extends TestCase
         $this->assertEquals(2, $count);
     }
 
-    /** @test */
-    public function it_handles_different_line_endings_crlf()
+    public function test_it_handles_different_line_endings_crlf()
     {
         $csvContent = str_replace("\n", "\r\n", $this->getValidCsvContent());
 
@@ -87,8 +82,7 @@ class CsvParserTest extends TestCase
         $this->assertEquals(2, $result['row_count']);
     }
 
-    /** @test */
-    public function it_handles_utf8_with_accents()
+    public function test_it_handles_utf8_with_accents()
     {
         $csvContent = "# METADATA - DO NOT EDIT THIS SECTION\n";
         $csvContent .= "# version: v1\n";
@@ -109,8 +103,7 @@ class CsvParserTest extends TestCase
         $this->assertStringContainsString('café', $result['data_rows'][0]['description']);
     }
 
-    /** @test */
-    public function it_handles_empty_metadata()
+    public function test_it_handles_empty_metadata()
     {
         $csvContent = "Issue Key,Summary,Description,Reporter\n";
         $csvContent .= "DEMO-001,Test,Description,test@example.com\n";
@@ -120,8 +113,7 @@ class CsvParserTest extends TestCase
         $this->assertEmpty($metadata);
     }
 
-    /** @test */
-    public function it_handles_no_data_rows()
+    public function test_it_handles_no_data_rows()
     {
         $csvContent = "# METADATA - DO NOT EDIT THIS SECTION\n";
         $csvContent .= "# version: v1\n";
@@ -133,8 +125,7 @@ class CsvParserTest extends TestCase
         $this->assertEmpty($dataRows);
     }
 
-    /** @test */
-    public function it_handles_malformed_metadata_lines()
+    public function test_it_handles_malformed_metadata_lines()
     {
         $lines = [
             '# METADATA - DO NOT EDIT THIS SECTION',

@@ -18,8 +18,7 @@ class CsvGenerateControllerTest extends TestCase
         config(['services.csv_signing_key' => 'test_csv_signing_key_for_feature_tests_123456789']);
     }
 
-    /** @test */
-    public function it_returns_200_with_valid_csv_when_ticket_count_is_provided()
+    public function test_it_returns_200_with_valid_csv_when_ticket_count_is_provided()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 5
@@ -48,8 +47,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertEquals('v1', $response->json('data.metadata.version'));
     }
 
-    /** @test */
-    public function it_returns_base64_encoded_csv_content()
+    public function test_it_returns_base64_encoded_csv_content()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 1
@@ -67,8 +65,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertStringContainsString('Issue Key,Issue Type,Summary,Description,Reporter', $decoded);
     }
 
-    /** @test */
-    public function it_generates_csv_with_correct_number_of_tickets()
+    public function test_it_generates_csv_with_correct_number_of_tickets()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 3
@@ -101,8 +98,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertEquals(4, $dataLines);
     }
 
-    /** @test */
-    public function it_returns_422_when_ticket_count_is_missing()
+    public function test_it_returns_422_when_ticket_count_is_missing()
     {
         $response = $this->postJson('/api/csv/generate', []);
 
@@ -116,8 +112,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertArrayHasKey('ticket_count', $response->json('details'));
     }
 
-    /** @test */
-    public function it_returns_422_when_ticket_count_is_too_low()
+    public function test_it_returns_422_when_ticket_count_is_too_low()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 0
@@ -131,8 +126,7 @@ class CsvGenerateControllerTest extends TestCase
                 ]);
     }
 
-    /** @test */
-    public function it_returns_422_when_ticket_count_is_too_high()
+    public function test_it_returns_422_when_ticket_count_is_too_high()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 51
@@ -146,8 +140,7 @@ class CsvGenerateControllerTest extends TestCase
                 ]);
     }
 
-    /** @test */
-    public function it_returns_422_when_ticket_count_is_not_integer()
+    public function test_it_returns_422_when_ticket_count_is_not_integer()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 'invalid'
@@ -161,8 +154,7 @@ class CsvGenerateControllerTest extends TestCase
                 ]);
     }
 
-    /** @test */
-    public function it_generates_valid_metadata_structure()
+    public function test_it_generates_valid_metadata_structure()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 2
@@ -193,8 +185,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $metadata['signature']);
     }
 
-    /** @test */
-    public function it_generates_csv_with_metadata_section()
+    public function test_it_generates_csv_with_metadata_section()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 1
@@ -219,8 +210,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertStringContainsString("\n\nIssue Key,Issue Type,Summary,Description,Reporter", $csvContent);
     }
 
-    /** @test */
-    public function it_handles_maximum_allowed_ticket_count()
+    public function test_it_handles_maximum_allowed_ticket_count()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 50
@@ -230,8 +220,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertEquals(50, $response->json('data.metadata.row_count'));
     }
 
-    /** @test */
-    public function it_handles_minimum_allowed_ticket_count()
+    public function test_it_handles_minimum_allowed_ticket_count()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 1
@@ -241,8 +230,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertEquals(1, $response->json('data.metadata.row_count'));
     }
 
-    /** @test */
-    public function it_generates_different_session_ids_for_different_requests()
+    public function test_it_generates_different_session_ids_for_different_requests()
     {
         $response1 = $this->postJson('/api/csv/generate', ['ticket_count' => 1]);
         $response2 = $this->postJson('/api/csv/generate', ['ticket_count' => 1]);
@@ -253,8 +241,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertNotEquals($sessionId1, $sessionId2);
     }
 
-    /** @test */
-    public function it_accepts_additional_parameters_without_error()
+    public function test_it_accepts_additional_parameters_without_error()
     {
         $response = $this->postJson('/api/csv/generate', [
             'ticket_count' => 3,
@@ -265,8 +252,7 @@ class CsvGenerateControllerTest extends TestCase
         $this->assertEquals(3, $response->json('data.metadata.row_count'));
     }
 
-    /** @test */
-    public function it_enforces_rate_limiting_on_csv_generate_endpoint()
+    public function test_it_enforces_rate_limiting_on_csv_generate_endpoint()
     {
         // Clear cache to start fresh
         Cache::flush();
@@ -295,8 +281,7 @@ class CsvGenerateControllerTest extends TestCase
                 ->assertHeader('X-RateLimit-Remaining', '0');
     }
 
-    /** @test */
-    public function it_does_not_expose_nonce_in_response()
+    public function test_it_does_not_expose_nonce_in_response()
     {
         $response = $this->postJson('/api/csv/generate', ['ticket_count' => 1]);
 

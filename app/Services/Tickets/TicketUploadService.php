@@ -6,6 +6,7 @@ use App\Exceptions\ValidationException;
 use App\Models\ClassificationJob;
 use App\Models\Ticket;
 use App\Services\Ai\AiClassificationService;
+use App\Services\Ai\ConcurrentAiClassifier;
 use App\Services\Cache\ClassificationCacheRepository;
 use App\Services\Csv\CsvParser;
 use App\Services\Csv\CsvSanitizer;
@@ -28,6 +29,7 @@ class TicketUploadService
         private HmacSignatureService $hmacService,
         private NonceService $nonceService,
         private AiClassificationService $aiService,
+        private ConcurrentAiClassifier $concurrentAiService,
         private PriorityCalculationService $priorityService,
         private ClassificationCacheRepository $cacheRepository
     ) {}
@@ -241,16 +243,68 @@ class TicketUploadService
             Ticket::create($ticketData);
         }
 
-        // Phase 3: Retrieve created tickets and classify them
+        // Phase 3: Retrieve created tickets and classify them using concurrent processing
         $tickets = Ticket::where('job_id', $job->id)
             ->orderBy('created_at')
             ->get();
 
-        $ticketUpdates = [];
+        // Separate tickets that need AI classification vs those that can use cache
+        $ticketsNeedingAi = [];
+        $cachedClassifications = [];
 
-        foreach ($tickets as $index => $ticket) {
-            // Classify ticket (with cache + AI)
-            $classification = $this->classifyTicket($ticket);
+        foreach ($tickets as $ticket) {
+            $ticketData = [
+                'issue_key' => $ticket->issue_key,
+                'summary' => $ticket->summary,
+                'description' => $ticket->description,
+                'reporter' => $ticket->reporter,
+            ];
+
+            // Try to get from cache first
+            $cached = $this->cacheRepository->getCached($ticketData);
+
+            if ($cached !== null) {
+                // Cache hit - use cached classification
+                $cachedClassifications[$ticket->id] = $cached;
+            } else {
+                // Cache miss - needs AI classification
+                $ticketsNeedingAi[] = $ticketData;
+            }
+        }
+
+        // Phase 4: Classify tickets needing AI using concurrent processing
+        $aiClassifications = [];
+        if (!empty($ticketsNeedingAi)) {
+            Log::info('Processing tickets with concurrent AI classification', [
+                'total_tickets' => count($tickets),
+                'cached' => count($cachedClassifications),
+                'needing_ai' => count($ticketsNeedingAi)
+            ]);
+
+            $aiClassifications = $this->concurrentAiService->classifyBatch($ticketsNeedingAi);
+
+            // Store AI results in cache for future use
+            foreach ($ticketsNeedingAi as $index => $ticketData) {
+                if (isset($aiClassifications[$index])) {
+                    $this->cacheRepository->setCached($ticketData, $aiClassifications[$index]);
+                }
+            }
+        }
+
+        // Phase 5: Combine cache and AI results, calculate priorities and prepare updates
+        $ticketUpdates = [];
+        $aiIndex = 0;
+
+        foreach ($tickets as $ticket) {
+            $ticketId = $ticket->id;
+
+            // Get classification (from cache or AI)
+            if (isset($cachedClassifications[$ticketId])) {
+                $classification = $cachedClassifications[$ticketId];
+            } else {
+                $classification = $aiClassifications[$aiIndex] ?? $this->createFallbackClassification();
+                $aiIndex++;
+            }
 
             // Calculate priority (ITIL) and SLA
             $priorityAndSla = $this->priorityService->calculatePriorityAndSla(
@@ -286,18 +340,16 @@ class TicketUploadService
                     'reasoning' => $classification['reasoning'],
                 ],
             ];
-
-            // Batch update every 10 tickets to avoid memory issues
-            if (count($ticketUpdates) >= 10) {
-                $this->bulkUpdateTickets($ticketUpdates);
-                $ticketUpdates = [];
-            }
         }
 
-        // Phase 4: Update remaining tickets
-        if (!empty($ticketUpdates)) {
-            $this->bulkUpdateTickets($ticketUpdates);
-        }
+        // Phase 6: Bulk update all tickets
+        $this->bulkUpdateTickets($ticketUpdates);
+
+        Log::info('Ticket processing completed', [
+            'total_tickets' => count($tickets),
+            'cached_hits' => count($cachedClassifications),
+            'ai_classifications' => count($ticketsNeedingAi)
+        ]);
 
         return $processedTickets;
     }
@@ -357,6 +409,21 @@ class TicketUploadService
             'processing_time_ms' => $processingTimeMs,
             'completed_at' => now(),
         ]);
+    }
+
+    /**
+     * Create fallback classification for tickets that fail processing
+     */
+    private function createFallbackClassification(): array
+    {
+        return [
+            'category' => 'General',
+            'sentiment' => 'Neutral',
+            'impact' => 'Medium',
+            'urgency' => 'Medium',
+            'reasoning' => 'Fallback classification due to processing failure',
+            'model_used' => 'fallback'
+        ];
     }
 
     /**
