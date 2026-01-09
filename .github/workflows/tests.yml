@@ -46,9 +46,14 @@ jobs:
 
     - name: Wait for app container to be healthy
       run: |
-        echo "Waiting for app container to be healthy..."
+        echo "Waiting for app and nginx containers to be healthy..."
+        sleep 10
+        echo "Checking container status:"
+        docker compose ps
+        echo ""
+        echo "Testing health endpoint..."
         for i in {1..15}; do
-          if docker compose exec -T app curl -sf http://localhost:8000/api/health > /dev/null 2>&1; then
+          if docker compose exec -T app curl -sf http://nginx/api/health > /dev/null 2>&1; then
             echo "App container is healthy!"
             break
           fi
@@ -56,10 +61,18 @@ jobs:
           sleep 5
           if [ $i -eq 15 ]; then
             echo "App container failed to become healthy"
-            echo "Checking health endpoint response:"
-            docker compose exec -T app curl -v http://localhost:8000/api/health || true
-            echo "Container logs:"
+            echo ""
+            echo "Checking health endpoint response from inside container:"
+            docker compose exec -T app curl -v http://nginx/api/health || true
+            echo ""
+            echo "Checking health endpoint from host:"
+            curl -v http://localhost:8000/api/health || true
+            echo ""
+            echo "App container logs:"
             docker compose logs app
+            echo ""
+            echo "Nginx container logs:"
+            docker compose logs nginx
             exit 1
           fi
         done
