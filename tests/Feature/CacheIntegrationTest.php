@@ -155,13 +155,7 @@ class CacheIntegrationTest extends TestCase
      */
     private function generateCacheKey(array $ticket): string
     {
-        $issueKey = $ticket['issue_key'] ?? '';
-        $summary = $ticket['summary'] ?? '';
-        $description = $ticket['description'] ?? '';
-
-        $dataString = $issueKey . '|' . $summary . '|' . $description;
-        $hash = hash('sha256', $dataString);
-
-        return 'classification:' . $hash;
+        $generator = new \App\Services\Cache\SemanticCacheKeyGenerator();
+        return $generator->generateKey($ticket);
     }
 }

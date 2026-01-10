@@ -10,6 +10,13 @@ class ClassificationCacheRepository
     private const CACHE_TTL_MINUTES = 30;
     private const CACHE_KEY_PREFIX = 'classification';
 
+    private CacheMetricsCollector $metrics;
+
+    public function __construct(?CacheMetricsCollector $metrics = null)
+    {
+        $this->metrics = $metrics ?? new CacheMetricsCollector();
+    }
+
     /**
      * Get cached classification for a ticket.
      *
@@ -27,6 +34,7 @@ class ClassificationCacheRepository
                 'ticket' => $ticket['issue_key'] ?? 'unknown',
                 'cache_key' => $key,
             ]);
+            $this->metrics->recordMiss();
             return null;
         }
 
@@ -45,6 +53,8 @@ class ClassificationCacheRepository
             'ticket' => $ticket['issue_key'] ?? 'unknown',
             'cache_key' => $key,
         ]);
+
+        $this->metrics->recordHit();
 
         return $cached;
     }
@@ -71,23 +81,12 @@ class ClassificationCacheRepository
     /**
      * Generate cache key for ticket classification.
      *
-     * Key format: classification:{SHA256_HASH}
-     * Hash includes: issue_key + summary + description
+     * Uses semantic normalization for better cache hit rate.
      */
     private function generateCacheKey(array $ticket): string
     {
-        // Extract relevant fields for cache key
-        $issueKey = $ticket['issue_key'] ?? '';
-        $summary = $ticket['summary'] ?? '';
-        $description = $ticket['description'] ?? '';
-
-        // Create deterministic string for hashing
-        $dataString = $issueKey . '|' . $summary . '|' . $description;
-
-        // Generate SHA256 hash for consistent key
-        $hash = hash('sha256', $dataString);
-
-        return self::CACHE_KEY_PREFIX . ':' . $hash;
+        $generator = new SemanticCacheKeyGenerator();
+        return $generator->generateKey($ticket);
     }
 
     /**
@@ -115,6 +114,14 @@ class ClassificationCacheRepository
     public function getCacheTtlMinutes(): int
     {
         return self::CACHE_TTL_MINUTES;
+    }
+
+    /**
+     * Get cache metrics.
+     */
+    public function getMetrics(): array
+    {
+        return $this->metrics->getMetrics();
     }
 
     /**

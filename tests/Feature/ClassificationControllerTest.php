@@ -165,6 +165,71 @@ class ClassificationControllerTest extends TestCase
         $this->assertEquals(2, Ticket::count());
     }
 
+    public function test_multiple_tickets_classification_with_mock()
+    {
+        // Mock the AI service to avoid real API calls
+        $mockClassification = [
+            'category' => 'Technical',
+            'sentiment' => 'Negative',
+            'impact' => 'High',
+            'urgency' => 'High',
+            'reasoning' => 'Mock classification for testing',
+            'model_used' => 'mock-model'
+        ];
+
+        $this->mock(AiClassificationService::class, function ($mock) use ($mockClassification) {
+            $mock->shouldReceive('classify')
+                ->twice()
+                ->andReturn($mockClassification);
+        });
+
+        $csvContent = $this->generateValidCsv([
+            [
+                'DEMO-001',
+                'Support',
+                'Cannot access account',
+                'User cannot log in after password reset. Error message shown.',
+                'john@example.com',
+                'support@example.com',
+                'High',
+                'Open',
+                '2025-12-27T10:00:00Z',
+                'account'
+            ],
+            [
+                'DEMO-002',
+                'Bug',
+                'Payment fails',
+                'Credit card payment processing returns error 500 for amounts over $1000.',
+                'jane@example.com',
+                'billing@example.com',
+                'Critical',
+                'Open',
+                '2025-12-27T11:00:00Z',
+                'billing;payment'
+            ],
+        ]);
+
+        $response = $this->postJson('/api/classify', [
+            'csv_content' => $csvContent,
+        ]);
+
+        $response->assertStatus(200);
+
+        $data = $response->json();
+
+        $this->assertEquals(2, $data['metadata']['total_tickets']);
+        $this->assertEquals(2, $data['metadata']['processed_tickets']);
+        $this->assertCount(2, $data['tickets']);
+
+        $this->assertEquals('DEMO-001', $data['tickets'][0]['issue_key']);
+        $this->assertEquals('DEMO-002', $data['tickets'][1]['issue_key']);
+
+        // Should create 1 job with 2 tickets, not 2 jobs
+        $this->assertEquals(1, ClassificationJob::count());
+        $this->assertEquals(2, Ticket::count());
+    }
+
     public function test_missing_csv_content_returns_validation_error()
     {
         $response = $this->postJson('/api/classify', []);

@@ -80,6 +80,7 @@ class TicketUploadService
                     'processed_tickets' => count($processedTickets),
                     'processing_time_ms' => (int) ((microtime(true) - $startTime) * 1000),
                 ],
+                'cache_metrics' => $this->cacheRepository->getMetrics(),
                 'tickets' => $processedTickets,
             ];
 
