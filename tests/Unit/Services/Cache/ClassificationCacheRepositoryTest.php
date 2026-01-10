@@ -99,14 +99,14 @@ class ClassificationCacheRepositoryTest extends TestCase
     {
         $ticket1 = [
             'issue_key' => 'TEST-001',
-            'summary' => 'Ticket 1',
-            'description' => 'Description 1'
+            'summary' => 'Login problem',
+            'description' => 'Cannot authenticate'
         ];
 
         $ticket2 = [
             'issue_key' => 'TEST-002',
-            'summary' => 'Ticket 2',
-            'description' => 'Description 2'
+            'summary' => 'Payment issue',
+            'description' => 'Transaction failed'
         ];
 
         $classification1 = ['category' => 'Technical'];
@@ -218,18 +218,36 @@ class ClassificationCacheRepositoryTest extends TestCase
         $this->assertEquals(0, $cleared);
     }
 
+    public function test_cache_com_chave_semantica(): void
+    {
+        $ticket1 = [
+            'issue_key' => 'TEST-001',
+            'summary' => 'Cannot access dashboard',
+            'description' => 'User cannot login'
+        ];
+
+        $ticket2 = [
+            'issue_key' => 'TEST-002', // Different key
+            'summary' => 'cannot access Dashboard!!!', // Similar but normalized
+            'description' => 'user cannot login' // Similar
+        ];
+
+        $classification = ['category' => 'Technical'];
+
+        // Cache with first ticket
+        $this->cache->setCached($ticket1, $classification);
+
+        // Should be retrievable with second ticket (semantic similarity)
+        $cached = $this->cache->getCached($ticket2);
+        $this->assertEquals($classification, $cached);
+    }
+
     /**
      * Helper method to generate cache key for testing.
      */
     private function generateTestKey(array $ticket): string
     {
-        $issueKey = $ticket['issue_key'] ?? '';
-        $summary = $ticket['summary'] ?? '';
-        $description = $ticket['description'] ?? '';
-
-        $dataString = $issueKey . '|' . $summary . '|' . $description;
-        $hash = hash('sha256', $dataString);
-
-        return 'classification:' . $hash;
+        $generator = new \App\Services\Cache\SemanticCacheKeyGenerator();
+        return $generator->generateKey($ticket);
     }
 }
