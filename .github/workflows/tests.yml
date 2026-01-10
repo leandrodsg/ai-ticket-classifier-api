@@ -27,10 +27,11 @@ jobs:
     - name: Create SQLite database
       run: touch database/database.sqlite
 
-    - name: Generate keys
+    - name: Generate keys and configure for CI
       run: |
         php artisan key:generate
         php -r "echo 'CSV_SIGNING_KEY=base64:' . base64_encode(random_bytes(32)) . PHP_EOL;" >> .env
+        echo "OPENROUTER_API_KEY=sk-or-v1-fake-key-for-ci-testing" >> .env
 
     - name: Build containers
       run: docker compose up -d --build
@@ -38,19 +39,40 @@ jobs:
     - name: Run migrations
       run: docker compose exec -T app php artisan migrate
 
+    - name: Fix permissions
+      run: |
+        docker compose exec -T app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+        docker compose exec -T app chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+
     - name: Wait for app container to be healthy
       run: |
-        echo "Waiting for app container to be healthy..."
-        for i in {1..30}; do
-          if docker compose exec -T app curl -s http://localhost:8000/api/health > /dev/null 2>&1; then
+        echo "Waiting for app and nginx containers to be healthy..."
+        sleep 15
+        echo "Checking container status:"
+        docker compose ps
+        echo ""
+        echo "Testing health endpoint..."
+        for i in {1..20}; do
+          if docker compose exec -T app curl -sf http://nginx/api/health > /dev/null 2>&1; then
             echo "App container is healthy!"
             break
           fi
-          echo "Waiting... ($i/30)"
+          echo "Waiting... ($i/20)"
           sleep 10
-          if [ $i -eq 30 ]; then
+          if [ $i -eq 20 ]; then
             echo "App container failed to become healthy"
+            echo ""
+            echo "Checking health endpoint response from inside container:"
+            docker compose exec -T app curl -v http://nginx/api/health || true
+            echo ""
+            echo "Checking health endpoint from host:"
+            curl -v http://localhost:8000/api/health || true
+            echo ""
+            echo "App container logs:"
             docker compose logs app
+            echo ""
+            echo "Nginx container logs:"
+            docker compose logs nginx
             exit 1
           fi
         done

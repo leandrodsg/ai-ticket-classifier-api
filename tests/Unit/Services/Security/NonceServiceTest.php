@@ -20,8 +20,7 @@ class NonceServiceTest extends TestCase
         $this->service = new NonceService();
     }
 
-    /** @test */
-    public function it_generates_32_character_nonce()
+    public function test_it_generates_32_character_nonce()
     {
         $nonce = $this->service->generate();
 
@@ -30,8 +29,7 @@ class NonceServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9]{32}$/', $nonce);
     }
 
-    /** @test */
-    public function it_generates_unique_nonces()
+    public function test_it_generates_unique_nonces()
     {
         $nonce1 = $this->service->generate();
         $nonce2 = $this->service->generate();
@@ -39,8 +37,7 @@ class NonceServiceTest extends TestCase
         $this->assertNotEquals($nonce1, $nonce2);
     }
 
-    /** @test */
-    public function it_validates_first_use_of_nonce()
+    public function test_it_validates_first_use_of_nonce()
     {
         $nonce = $this->service->generate();
 
@@ -54,8 +51,7 @@ class NonceServiceTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_rejects_reuse_of_nonce()
+    public function test_it_rejects_reuse_of_nonce()
     {
         $nonce = $this->service->generate();
 
@@ -68,8 +64,7 @@ class NonceServiceTest extends TestCase
         $this->assertFalse($secondUse);
     }
 
-    /** @test */
-    public function it_marks_nonce_as_used_with_expiration()
+    public function test_it_marks_nonce_as_used_with_expiration()
     {
         $nonce = 'test_nonce_12345678901234567890123456789012';
         $expiresAt = Carbon::now()->addHours(2);
@@ -82,8 +77,7 @@ class NonceServiceTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_marks_nonce_as_used_with_default_expiration()
+    public function test_it_marks_nonce_as_used_with_default_expiration()
     {
         $nonce = $this->service->generate();
 
@@ -99,8 +93,7 @@ class NonceServiceTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_cleans_up_expired_nonces()
+    public function test_it_cleans_up_expired_nonces()
     {
         // Create expired nonce
         $expiredNonce = 'expired_nonce_12345678901234567890123456789012';
@@ -134,8 +127,7 @@ class NonceServiceTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_returns_zero_when_no_expired_nonces()
+    public function test_it_returns_zero_when_no_expired_nonces()
     {
         // Create only valid nonces
         $nonce1 = 'valid1_12345678901234567890123456789012';
@@ -157,8 +149,7 @@ class NonceServiceTest extends TestCase
         $this->assertEquals(0, $deletedCount);
     }
 
-    /** @test */
-    public function it_checks_if_nonce_is_expired()
+    public function test_it_checks_if_nonce_is_expired()
     {
         // Create expired nonce
         $expiredNonce = 'expired_12345678901234567890123456789012';
@@ -180,8 +171,7 @@ class NonceServiceTest extends TestCase
         $this->assertFalse($this->service->isExpired($validNonce));
     }
 
-    /** @test */
-    public function it_returns_false_for_nonexistent_nonce()
+    public function test_it_returns_false_for_nonexistent_nonce()
     {
         $nonexistentNonce = 'does_not_exist_12345678901234567890123456789012';
 

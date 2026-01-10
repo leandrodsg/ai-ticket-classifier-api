@@ -13,7 +13,7 @@ class AiClassificationService
 
     public function __construct(
         private OpenRouterClient $client,
-        private ClassificationPrompt $promptBuilder,
+        private PromptBuilderInterface $promptBuilder,
         ModelDiscoveryService $discoveryService
     ) {
         $this->discoveryService = $discoveryService;

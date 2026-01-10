@@ -55,10 +55,10 @@ class ClassificationController extends Controller
                 ], 422);
             }
 
-            if (count($parsed['data_rows']) > 50) {
+            if (count($parsed['data_rows']) > 20) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Maximum 50 tickets allowed per request',
+                    'error' => 'Maximum 20 tickets allowed per request',
                 ], 422);
             }
 
@@ -125,6 +125,11 @@ class ClassificationController extends Controller
                         ];
 
                         $job->update(['processed_tickets' => $index + 1]);
+
+                        // Add delay between tickets to avoid rate limiting (OpenRouter free tier: 20 RPM)
+                        if ($index < count($parsed['data_rows']) - 1) {
+                            sleep(6); // 6 seconds delay between requests
+                        }
 
                     } catch (\InvalidArgumentException $e) {
                         // Validation errors should return 422, not 500

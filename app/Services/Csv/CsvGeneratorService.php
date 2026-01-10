@@ -23,11 +23,14 @@ class CsvGeneratorService
         $templates = $this->getTicketTemplates();
         $tickets = [];
 
+        // Generate unique timestamp suffix to prevent duplicate issue keys
+        $timestamp = now()->format('His');
+
         for ($i = 1; $i <= $count; $i++) {
             $template = $templates[($i - 1) % count($templates)];
 
             $tickets[] = [
-                'issue_key' => sprintf('DEMO-%03d', $i),
+                'issue_key' => sprintf('DEMO-%s-%03d', $timestamp, $i),
                 'issue_type' => $template['issue_type'],
                 'summary' => $template['summary'],
                 'description' => $template['description'],
