@@ -28,8 +28,12 @@ return [
     ],
 
     'cache' => [
-        'key_prefix' => 'ai_models_',
-        'driver' => env('AI_CACHE_DRIVER', null),
+        'enabled' => env('AI_CACHE_ENABLED', true),
+        'ttl_minutes' => env('AI_CACHE_TTL_MINUTES', 30),
+        'driver' => env('AI_CACHE_DRIVER', 'database'),
+        'key_strategy' => env('AI_CACHE_KEY_STRATEGY', 'semantic'),
+        'collect_metrics' => env('AI_CACHE_COLLECT_METRICS', true),
+        'normalize_text' => env('AI_CACHE_NORMALIZE_TEXT', true),
     ],
 
     'concurrency' => [

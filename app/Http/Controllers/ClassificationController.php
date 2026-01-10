@@ -126,6 +126,11 @@ class ClassificationController extends Controller
 
                         $job->update(['processed_tickets' => $index + 1]);
 
+                        // Add delay between tickets to avoid rate limiting (OpenRouter free tier: 20 RPM)
+                        if ($index < count($parsed['data_rows']) - 1) {
+                            sleep(6); // 6 seconds delay between requests
+                        }
+
                     } catch (\InvalidArgumentException $e) {
                         // Validation errors should return 422, not 500
                         Log::warning('Validation error processing ticket', [
