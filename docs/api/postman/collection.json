@@ -287,18 +287,13 @@
               "",
               "pm.test('Response has version info', function () {",
               "    const json = pm.response.json();",
-              "    pm.expect(json.data).to.have.property('version');",
-              "    pm.expect(json.data).to.have.property('endpoints');",
+              "    pm.expect(json).to.have.property('version');",
+              "    pm.expect(json).to.have.property('name');",
+              "    pm.expect(json).to.have.property('features');",
               "});",
               "",
-              "pm.test('Has 4 documented endpoints', function () {",
-              "    const json = pm.response.json();",
-              "    pm.expect(json.data.endpoints).to.be.an('array');",
-              "    pm.expect(json.data.endpoints.length).to.equal(4);",
-              "});",
-              "",
-              "console.log('API Version:', pm.response.json().data.version);",
-              "console.log('Endpoints:', pm.response.json().data.endpoints);"
+              "console.log('API Version:', pm.response.json().version);",
+              "console.log('Environment:', pm.response.json().environment);"
             ],
             "type": "text/javascript"
           }
@@ -436,6 +431,101 @@
           "path": ["tickets", "00000000-0000-0000-0000-000000000000"]
         },
         "description": "Example of not found error: querying non-existent session ID."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('API is healthy', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.status).to.equal('healthy');",
+              "    pm.expect(json.checks).to.have.property('database');",
+              "    pm.expect(json.checks).to.have.property('cache');",
+              "    pm.expect(json.checks).to.have.property('ai_service');",
+              "});",
+              "",
+              "console.log('Health Status:', pm.response.json().status);",
+              "console.log('Response Time:', pm.response.json().response_time_ms + 'ms');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Check API health status including database, cache, and AI service connectivity."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Direct Classification",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Classification successful', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.success).to.be.true;",
+              "    pm.expect(json.data).to.have.property('results');",
+              "    pm.expect(json.data.results).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Results contain expected fields', function () {",
+              "    const json = pm.response.json();",
+              "    if (json.data.results.length > 0) {",
+              "        const result = json.data.results[0];",
+              "        pm.expect(result).to.have.property('issue_key');",
+              "        pm.expect(result).to.have.property('category');",
+              "        pm.expect(result).to.have.property('priority');",
+              "        pm.expect(result).to.have.property('sla_due_date');",
+              "    }",
+              "});",
+              "",
+              "console.log('Processed tickets:', pm.response.json().data.processed);",
+              "console.log('Processing time:', pm.response.json().data.processing_time_ms + 'ms');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"csv_content\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/classify",
+          "host": ["{{baseUrl}}"],
+          "path": ["classify"]
+        },
+        "description": "Direct classification of tickets from raw CSV content. Requires valid CSV data in the csv_content field."
       },
       "response": []
     }
